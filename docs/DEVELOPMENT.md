@@ -27,7 +27,6 @@
 
 ## 人工接力
 遵循 HANDOFF.md；工具入口见 CLAUDE.md 和 adapters/ENTRY.md。
-Hindsight 操作遵循 docs/AGENT-RULES.md 第 17 节。
 
 ## 发布入口
 发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 18 节，执行与回滚见 DEPLOYMENT.md。

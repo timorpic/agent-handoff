@@ -7,7 +7,7 @@
 ├── AGENTS.md                  # 精简启动入口与必守边界
 ├── CLAUDE.md                  # Claude Code 统一入口
 ├── README.md                  # 项目简介与快速开始
-├── MEMORY.md                  # 长期知识与共享同步索引
+├── MEMORY.md                  # 长期知识与决策索引
 ├── DESIGN.md                  # 视觉与交互规范（无 UI 时不适用）
 ├── CHANGELOG.md               # 版本变更与升级说明
 ├── TODO.md                    # 任务计划与依赖
@@ -36,9 +36,9 @@
 | --- | --- |
 | README.md | 项目简介、技术栈摘要和快速开始 |
 | AGENTS.md | 精简启动入口、必守边界及章节读取路由 |
-| docs/AGENT-RULES.md | 开发、质量、安全、图标、Release、Hindsight 与协作详细规则 |
+| docs/AGENT-RULES.md | 开发、质量、安全、图标、Release、长期知识与协作详细规则 |
 | CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则 |
-| MEMORY.md | 当前有效的长期知识、决策索引及共享同步索引 |
+| MEMORY.md | 当前有效的长期知识及决策索引 |
 | DESIGN.md | 有 UI 的项目采用的视觉与交互规范 |
 | CHANGELOG.md | 面向使用者的版本变更和升级说明 |
 | TODO.md / 既有 Issue 系统 | 任务计划、依赖及计划状态 |
@@ -75,18 +75,6 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 6. 使用工具原生支持的规则入口；Claude Code 使用 CLAUDE.md，支持 AGENTS.md 的工具使用根目录 AGENTS.md。
    入口未加载或工具无对应机制时，可显式使用 adapters/ENTRY.md。
    在实际工具中核实文件已读取，入口未加载时使用 PROMPTS 中的显式提示。
-7. Hindsight 连接存在时核对 Bank 为 OpenMemory，按 docs/AGENT-RULES.md 第 17 节操作。
-   不在模板中配置地址或凭据，不预填其他项目记忆。
-
-## Hindsight 的操作闭环
-
-- 开始/接管任务：按稳定项目标签及任务主题 recall，逐条核对项目归属、确认依据和有效性。
-- 开始关键决策：检索相关历史，与本地现行需求和 ADR 核实后再判断。
-- 决策或里程碑确认：先更新 MEMORY / ADR，再 retain 带标准标签的精炼摘要。
-- 召回情况及本次采用的条目引用写 CHECKPOINT；长期同步状态写 MEMORY 的共享同步索引。
-- accepted / initiated 只算 pending，确认实际存储完成后才记 synced。
-- 离线、无匹配结果或异步结果未知时按规则处理，不阻断可基于本地资料继续的工作。
-- 不进行无项目范围的默认召回，不自动继承跨项目偏好或事实，不写临时执行流水账。
 
 ## 避免重复维护
 
@@ -94,7 +82,6 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 TODO 维护计划，CHECKPOINT 维护实际现场；完成状态必须有验收证据。
 MEMORY 只摘录长期约束并链接主记录，不复制完整架构、设计或需求。
 CONTEXT 引用需求条款和当前任务，不复制长期知识。
-Hindsight 是长期摘要的检索副本，不能替代以上主记录。
 
 ## 阅读与维护路径
 
@@ -102,7 +89,7 @@ Hindsight 是长期摘要的检索副本，不能替代以上主记录。
 2. 依据 CONTEXT 的精确引用读取相关需求、架构、开发或部署文档，避免遍历全部文档。
 3. 只有需要核对决定理由、旧问题或恢复依据时，读取相关 ADR、经验历史或归档检查点。
 4. 文件树与职责表只做导航；新增、移动、删除文档时同步更新，不记录进度和决定。
-5. MEMORY 通过条目 ID 链接详细依据；历史变多时按 docs/AGENT-RULES.md 第 17.7 节整理，关键约束不能因时间较旧丢失。
+5. MEMORY 通过条目 ID 链接详细依据；历史变多时按 docs/AGENT-RULES.md 第 17.2 节整理，关键约束不能因时间较旧丢失。
 6. 正常结束或交接填写检查点结果摘要，区分已完成、未完成、未验证和阻塞条件。
 
 本套模板是可由不同工具执行的文件协议。入口读取、记忆整理和结果记录须由当前工具实际执行；

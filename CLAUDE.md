@@ -7,8 +7,8 @@
 
 按 AGENTS.md 核对 MEMORY、CONTEXT、CHECKPOINT、项目身份和实际文件，
 完成适用章节及相关文档读取后再修改。
-接力、异常恢复遵循 HANDOFF.md；Hindsight 遵循详细规则第 17 节。
+接力、异常恢复遵循 HANDOFF.md。
 输入或工具输出被截断时补读，不声称已读取未见内容。
 
-不自动启动或调度其他 Agent，不依据空模板或召回结果扩大授权。
+不自动启动或调度其他 Agent，不依据空模板或记忆扩大授权。
 已有 CLAUDE.md 时合并保留项目专用内容。
