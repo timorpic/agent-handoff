@@ -103,9 +103,12 @@ docs/INITIALIZATION.md（本文件）不复制到目标项目：它说明的是�
 ~~~gitignore
 /.handoff/CONTEXT.md
 /.handoff/CHECKPOINT.md
-/.handoff/*.previous
+/.handoff/*.previous          # 含 CHECKPOINT.previous.md 与 .CHECKPOINT.md.previous
 /.handoff/*.tmp.md
 ~~~
+
+previous 备份统一命名为 `.handoff/CHECKPOINT.previous.md`（见 HANDOFF.md 第 5 节）；
+存量项目若用其他命名（如 `.CHECKPOINT.md.previous`），`*.previous` 通配同样覆盖，不必改名。
 
 ### 项目层：跟踪
 
