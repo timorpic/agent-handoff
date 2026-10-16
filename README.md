@@ -35,7 +35,7 @@
 - [视觉与交互规范](DESIGN.md)（无 UI 时不适用）
 - [任务计划](TODO.md)
 - [版本记录](CHANGELOG.md)
-- [开发规则](AGENTS.md)
+- [规则入口](AGENTS.md) / [详细工作规则](docs/AGENT-RULES.md)
 - [长期知识](MEMORY.md)
 - [人工接力协议](HANDOFF.md)
 - [当前任务](.handoff/CONTEXT.md) / [执行现场](.handoff/CHECKPOINT.md)

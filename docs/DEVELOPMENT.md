@@ -19,7 +19,7 @@
 没有实际执行的检查不能写为通过；实际结果记录在检查点或正式验收记录。
 
 ## 修改与提交
-遵循 AGENTS.md 的开发、安全、Git 及测试规则；项目特有分支和提交约定在此填写。
+遵循 AGENTS.md 指向的详细开发、安全、Git 及测试规则；项目特有分支和提交约定在此填写。
 不将一般修改请求扩展为所有外部操作授权。
 
 ## 数据迁移与兼容性
@@ -27,8 +27,8 @@
 
 ## 人工接力
 遵循 HANDOFF.md；工具入口见 CLAUDE.md 和 adapters/ENTRY.md。
-Hindsight 操作遵循 AGENTS.md 第 17 节。
+Hindsight 操作遵循 docs/AGENT-RULES.md 第 17 节。
 
 ## 发布入口
-发布版本号及质量要求遵循 AGENTS.md 第 18 节，执行与回滚见 DEPLOYMENT.md。
+发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 18 节，执行与回滚见 DEPLOYMENT.md。
 组件发布等流程只有实际存在时才补充。

@@ -4,7 +4,7 @@
 
 ~~~text
 项目根目录/
-├── AGENTS.md                  # 通用开发、记忆与 Release 规则
+├── AGENTS.md                  # 精简启动入口与必守边界
 ├── CLAUDE.md                  # Claude Code 统一入口
 ├── README.md                  # 项目简介与快速开始
 ├── MEMORY.md                  # 长期知识与共享同步索引
@@ -20,6 +20,7 @@
 │   └── ENTRY.md               # 其他工具可显式使用的统一入口
 └── docs/
     ├── INITIALIZATION.md      # 模板初始化与使用说明（本文件）
+    ├── AGENT-RULES.md         # 开发、记忆、Release 与接力详细规则
     ├── PROJECT-SPEC.md        # 产品目标、范围与验收
     ├── ARCHITECTURE.md        # 系统架构与模块边界
     ├── DEVELOPMENT.md         # 环境、开发与验证流程
@@ -34,7 +35,8 @@
 | 文件 | 主记录内容 |
 | --- | --- |
 | README.md | 项目简介、技术栈摘要和快速开始 |
-| AGENTS.md | 开发、质量、安全、图标、Release、Hindsight 与协作规则 |
+| AGENTS.md | 精简启动入口、必守边界及章节读取路由 |
+| docs/AGENT-RULES.md | 开发、质量、安全、图标、Release、Hindsight 与协作详细规则 |
 | CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则 |
 | MEMORY.md | 当前有效的长期知识、决策索引及共享同步索引 |
 | DESIGN.md | 有 UI 的项目采用的视觉与交互规范 |
@@ -51,6 +53,17 @@
 
 所有项目事实和任务字段均待初始化。规则中的示例不代表实际项目事实。
 
+## 入口与详细规则
+
+AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具读取同一入口。
+详细工作规则统一保留在 docs/AGENT-RULES.md，章节编号用于稳定引用。
+先读取入口规定的基础章节，再按任务补读记忆、图标、发版或接力章节。
+已有同一会话内已读且未变化的规则无需重复加载。
+
+入口引用只是读取指令，不会自动把被引用文件全文注入上下文；
+执行工具须实际读取所需章节。工具输出被截断时应补读，不能默认为已读完。
+入口应持续保持精简，避免添加长篇正文；不通过修改工具全局配置提高限制来代替精简。
+
 ## 首次使用
 
 1. 将模板文件及 .handoff 点目录复制到目标项目；已有同名文件先核对并合并，不能直接覆盖。
@@ -59,9 +72,10 @@
    部署流程尚未确定时 DEPLOYMENT 保持空白；没有 UI 时 DESIGN 标明不适用。
 4. 只把长期有效且容易遗漏的事实和决策摘要写进 MEMORY，详细依据引用正式文档。
 5. 有实际任务后初始化 CONTEXT 和首份 CHECKPOINT；没有任务时保留 draft。
-6. Claude Code 从 CLAUDE.md 读取统一入口；其他工具可显式使用 adapters/ENTRY.md。
+6. 使用工具原生支持的规则入口；Claude Code 使用 CLAUDE.md，支持 AGENTS.md 的工具使用根目录 AGENTS.md。
+   入口未加载或工具无对应机制时，可显式使用 adapters/ENTRY.md。
    在实际工具中核实文件已读取，入口未加载时使用 PROMPTS 中的显式提示。
-7. Hindsight 连接存在时核对 Bank 为 OpenMemory，按 AGENTS.md 第 17 节操作。
+7. Hindsight 连接存在时核对 Bank 为 OpenMemory，按 docs/AGENT-RULES.md 第 17 节操作。
    不在模板中配置地址或凭据，不预填其他项目记忆。
 
 ## Hindsight 的操作闭环
@@ -84,11 +98,11 @@ Hindsight 是长期摘要的检索副本，不能替代以上主记录。
 
 ## 阅读与维护路径
 
-1. 开始或接手任务：先核对适用规则、MEMORY 的现行事实、CONTEXT 和最新 CHECKPOINT。
+1. 开始或接手任务：先读适用 AGENTS.md，按入口读取 docs/AGENT-RULES.md 对应章节，再核对 MEMORY 的现行事实、CONTEXT 和最新 CHECKPOINT。
 2. 依据 CONTEXT 的精确引用读取相关需求、架构、开发或部署文档，避免遍历全部文档。
 3. 只有需要核对决定理由、旧问题或恢复依据时，读取相关 ADR、经验历史或归档检查点。
 4. 文件树与职责表只做导航；新增、移动、删除文档时同步更新，不记录进度和决定。
-5. MEMORY 通过条目 ID 链接详细依据；历史变多时按 AGENTS.md 第 17.7 节整理，关键约束不能因时间较旧丢失。
+5. MEMORY 通过条目 ID 链接详细依据；历史变多时按 docs/AGENT-RULES.md 第 17.7 节整理，关键约束不能因时间较旧丢失。
 6. 正常结束或交接填写检查点结果摘要，区分已完成、未完成、未验证和阻塞条件。
 
 本套模板是可由不同工具执行的文件协议。入口读取、记忆整理和结果记录须由当前工具实际执行；
@@ -103,7 +117,7 @@ Hindsight 是长期摘要的检索副本，不能替代以上主记录。
 - docs/adr/：重要决策需要记录详细背景、备选方案和后果时建立。
 - docs/knowledge/：经验说明或历史过长时按需建立，MEMORY 保留稳定条目 ID 和入口。
 
-这些文件不要求每个项目创建；AGENTS.md 保留通用要求，项目文档只写实际适用的约定。
+这些文件不要求每个项目创建；通用详细要求维护在 docs/AGENT-RULES.md，项目文档只写实际适用的约定。
 部署平台、技术栈、数据库、版本基准年和发布渠道由当前项目确定。
 
 ## 人工接力
