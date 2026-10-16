@@ -8,7 +8,7 @@
 ## 开始任务
 
 1. 核对实际项目根目录，遵循适用的上层及局部规则。
-2. 首次进入项目先读取 docs/AGENT-RULES.md 第 1–13 节；本会话已读且未变化时无需重复。
+2. 首次进入项目先读取 docs/AGENT-RULES.md 第 1–14 节；本会话已读且未变化时无需重复。
 3. 读取 MEMORY.md、.handoff/CONTEXT.md 和 .handoff/CHECKPOINT.md（如存在），确认项目身份、目标与实际现场。
    模板仍为空白时按当前项目初始化；没有实际任务时保留 draft，不虚构历史。
    模板文件在目标项目中的 Git 归属按 docs/INITIALIZATION.md「模板文件的 Git 跟踪策略」执行。

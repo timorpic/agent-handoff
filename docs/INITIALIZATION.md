@@ -5,23 +5,23 @@
 ~~~text
 项目根目录/
 ├── AGENTS.md                  # 精简启动入口与必守边界          [项目层·跟踪]
-├── CLAUDE.md                  # Claude Code 统一入口             [协议层·不跟踪]
+├── CLAUDE.md                  # Claude Code 统一入口             [协议层·跟踪,禁改]
 ├── README.md                  # 项目简介与快速开始               [项目层·跟踪]
 ├── MEMORY.md                  # 长期知识与决策索引               [项目层·跟踪]
 ├── DESIGN.md                  # 视觉与交互规范（无 UI 时不适用） [项目层·跟踪]
 ├── CHANGELOG.md               # 版本变更与升级说明               [项目层·跟踪]
 ├── TODO.md                    # 任务计划与依赖                   [项目层·跟踪]
-├── HANDOFF.md                 # P0+P1 人工接力协议               [协议层·不跟踪]
-├── PROMPTS.md                 # 初始化、交接与恢复提示           [协议层·不跟踪]
+├── HANDOFF.md                 # P0+P1 人工接力协议               [协议层·跟踪,禁改]
+├── PROMPTS.md                 # 初始化、交接与恢复提示           [协议层·跟踪,禁改]
 ├── .handoff/
 │   ├── CONTEXT.md             # 活动任务目标与验收入口           [现场层·不跟踪]
 │   ├── CHECKPOINT.md          # 执行现场、验证与下一步           [现场层·不跟踪]
 │   └── archive/               # 归档任务上下文与检查点           [项目层·跟踪]
 ├── adapters/
-│   └── ENTRY.md               # 其他工具可显式使用的统一入口     [协议层·不跟踪]
+│   └── ENTRY.md               # 其他工具可显式使用的统一入口     [协议层·跟踪,禁改]
 └── docs/
     ├── INITIALIZATION.md      # 本文件；不复制到目标项目         [仅模板仓库]
-    ├── AGENT-RULES.md         # 开发、记忆、Release 与接力规则   [协议层·不跟踪]
+    ├── AGENT-RULES.md         # 开发、记忆、Release 与接力规则   [协议层·跟踪,禁改]
     ├── PROJECT-SPEC.md        # 产品目标、范围与验收             [项目层·跟踪]
     ├── ARCHITECTURE.md        # 系统架构与模块边界               [项目层·跟踪]
     ├── DEVELOPMENT.md         # 环境、开发与验证流程＋项目专属规则 [项目层·跟踪]
@@ -82,20 +82,19 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 
 ## 模板文件的 Git 跟踪策略
 
-模板文件分三层，判据是**跟踪「项目事实」；不跟踪「协议正文」和「会话现场」**。
-项目专属规则写进 docs/DEVELOPMENT.md 或 MEMORY.md，不改协议层正文。
+模板文件分三层，判据是**跟踪「协议正文」和「项目事实」；只不跟踪「会话现场」**。
 
-### 协议层：不跟踪，由模板统一升级
+### 协议层：跟踪，但项目内禁止修改（vendored 依赖）
 
-以下文件由模板仓库单一维护，项目内禁止修改；升级时整体覆盖：
+以下文件必须能随克隆分发——否则新克隆缺失入口、规则正文和恢复协议，
+AGENTS.md 的链接会全部指向不存在的文件，且「文件缺失时如何恢复」的 HANDOFF.md 自己就缺失。
+因此**纳入跟踪**，但视作 vendored 依赖：项目内不修改，升级时整体覆盖：
 
-~~~gitignore
-/CLAUDE.md
-/HANDOFF.md
-/PROMPTS.md
-/adapters/ENTRY.md
-/docs/AGENT-RULES.md
-~~~
+CLAUDE.md、HANDOFF.md、PROMPTS.md、adapters/ENTRY.md、docs/AGENT-RULES.md
+
+修改协议正文会导致项目分叉、章节编号漂移（历史教训：多个项目各自重编号，
+同一「第 18 节」在不同项目指向不同章节）。项目专属规则写入 AGENTS.md、
+docs/DEVELOPMENT.md 或 MEMORY.md，不改协议层。
 
 docs/INITIALIZATION.md（本文件）不复制到目标项目：它说明的是如何初始化，初始化完成后不再适用。
 
@@ -120,22 +119,26 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 
 ### 执行要求
 
-- 用锚定路径（前导 `/`），不写 `.handoff/` 或 `docs/` 整体忽略，否则会连带吞掉归档和项目文档。
-- 已跟踪的文件用 `git rm --cached -- <路径>` 取消跟踪；不加 `-f`，不删除本地文件。
+- 只忽略现场层；用锚定路径，不写 `.handoff/` 或 `docs/` 整体忽略，否则会连带吞掉归档和项目文档。
+- 工具入口若为符号链接（如 CLAUDE.md → AGENTS.md），须用 `git add` 纳入符号链接本身
+  （模式 120000）；否则新克隆后入口缺失。
+- 取消跟踪已跟踪文件时用 `git rm --cached -- <路径>`；不加 `-f`，不删除本地文件。
 - 逐项核对：本地文件仍存在且内容未变、`git ls-files` 中无该路径、`git check-ignore -v` 忽略生效。
-- 只写 `.gitignore` 不代表已取消跟踪；不存在的文件不创建空文件，保留其忽略规则。
 - 非 Git 项目先备好根目录 `.gitignore`，执行 `git init` 后补验。
-- 被忽略文件不随克隆传递，跨机接力须按 HANDOFF.md 核实本地副本。
+- **新克隆自检**：克隆到临时目录，确认工具入口、AGENTS.md 的全部链接、
+  docs/AGENT-RULES.md 与 HANDOFF.md 均存在。
 
 ### 协议版本锚定
 
-不跟踪协议正文就必须记录版本，否则无法核对升级与章节引用。
+协议层虽被跟踪，项目内仍禁止修改，故须记录所装版本以便核对升级：
 
 - 协议版本使用模板仓库的 commit SHA，不另造编号。
 - 在项目 MEMORY.md 记录：协议版本 SHA 与安装日期。
 - AGENTS.md 顶部写同一 SHA。
 - 升级＝整体覆盖协议层 5 个文件＋更新 SHA，随后核对章节引用仍可解析：
   `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md docs/*.md | sort -u`
+- 协议层文件在项目中应逐字节等于所标注 SHA 的模板版本；有差异即为待核实的私改。
+
 
 
 ## 避免重复维护
