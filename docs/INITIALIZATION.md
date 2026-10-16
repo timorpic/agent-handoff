@@ -5,7 +5,7 @@
 ~~~text
 项目根目录/
 ├── AGENTS.md                  # 精简启动入口与必守边界          [项目层·跟踪]
-├── CLAUDE.md                  # Claude Code 统一入口             [协议层·跟踪,禁改]
+├── CLAUDE.md                  # Claude Code 工具入口             [入口层·跟踪,可适配]
 ├── README.md                  # 项目简介与快速开始               [项目层·跟踪]
 ├── MEMORY.md                  # 长期知识与决策索引               [项目层·跟踪]
 ├── DESIGN.md                  # 视觉与交互规范（无 UI 时不适用） [项目层·跟踪]
@@ -18,7 +18,7 @@
 │   ├── CHECKPOINT.md          # 执行现场、验证与下一步           [现场层·不跟踪]
 │   └── archive/               # 归档任务上下文与检查点           [项目层·跟踪]
 ├── adapters/
-│   └── ENTRY.md               # 其他工具可显式使用的统一入口     [协议层·跟踪,禁改]
+│   └── ENTRY.md               # 无原生 AGENTS.md 机制时按需复制   [入口层·跟踪,可适配]
 └── docs/
     ├── INITIALIZATION.md      # 本文件；不复制到目标项目         [仅模板仓库]
     ├── AGENT-RULES.md         # 开发、记忆、Release 与接力规则   [协议层·跟踪,禁改]
@@ -39,7 +39,7 @@
 | README.md | 项目简介、技术栈摘要和快速开始 |
 | AGENTS.md | 精简启动入口、必守边界及章节读取路由 |
 | docs/AGENT-RULES.md | 开发、质量、安全、图标、Release、长期知识与协作详细规则 |
-| CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则 |
+| CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则（允许按项目适配） |
 | MEMORY.md | 当前有效的长期知识及决策索引 |
 | DESIGN.md | 有 UI 的项目采用的视觉与交互规范 |
 | CHANGELOG.md | 面向使用者的版本变更和升级说明 |
@@ -57,7 +57,7 @@
 
 ## 入口与详细规则
 
-AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具读取同一入口。
+AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 是工具入口，引导工具读取同一入口。
 详细工作规则统一保留在 docs/AGENT-RULES.md，章节编号用于稳定引用。
 先读取入口规定的基础章节，再按任务补读记忆、图标、发版或接力章节。
 已有同一会话内已读且未变化的规则无需重复加载。
@@ -70,6 +70,7 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 
 1. 将模板文件及 .handoff 点目录复制到目标项目；已有同名文件先核对并合并，不能直接覆盖。
    docs/INITIALIZATION.md 不复制；先按“模板文件的 Git 跟踪策略”配置并验证忽略规则。
+   CLAUDE.md 按目标项目的工具路由合并，adapters/ENTRY.md 仅在需要时复制。
 2. 确认目标项目根目录和稳定 project_id，写入 MEMORY；不使用模板目录或下载包名。
 3. 按当前项目填写 README、PROJECT-SPEC、ARCHITECTURE 和 DEVELOPMENT；未知信息保留待确认。
    部署流程尚未确定时 DEPLOYMENT 保持空白；没有 UI 时 DESIGN 标明不适用。
@@ -82,19 +83,31 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 
 ## 模板文件的 Git 跟踪策略
 
-模板文件分三层，判据是**跟踪「协议正文」和「项目事实」；只不跟踪「会话现场」**。
+模板文件分四层，判据是**跟踪「协议正文」「项目事实」和「工具入口」；只不跟踪「会话现场」**。
 
 ### 协议层：跟踪，但项目内禁止修改（vendored 依赖）
 
-以下文件必须能随克隆分发——否则新克隆缺失入口、规则正文和恢复协议，
+以下文件必须能随克隆分发——否则新克隆缺失规则正文和恢复协议，
 AGENTS.md 的链接会全部指向不存在的文件，且「文件缺失时如何恢复」的 HANDOFF.md 自己就缺失。
 因此**纳入跟踪**，但视作 vendored 依赖：项目内不修改，升级时整体覆盖：
 
-CLAUDE.md、HANDOFF.md、PROMPTS.md、adapters/ENTRY.md、docs/AGENT-RULES.md
+HANDOFF.md、PROMPTS.md、docs/AGENT-RULES.md
 
 修改协议正文会导致项目分叉、章节编号漂移（历史教训：多个项目各自重编号，
 同一「第 18 节」在不同项目指向不同章节）。项目专属规则写入 AGENTS.md、
 docs/DEVELOPMENT.md 或 MEMORY.md，不改协议层。
+
+### 入口层：跟踪，允许按项目适配
+
+CLAUDE.md、adapters/ENTRY.md
+
+入口文件是薄壳，职责是让工具找到本项目的 AGENTS.md 与规则正文，因此**必须跟踪**
+（否则新克隆后 Claude Code 没有入口），但**允许按项目调整**：可写成本项目的工具路由
+（如同时指向 backend/AGENTS.md），也可做成指向 AGENTS.md 的符号链接。
+入口层不参与协议版本的逐字节校验，升级时不必覆盖；适配后仍须保持精简，不复制规则正文。
+
+adapters/ENTRY.md 是按需文件：只有目标工具既无原生入口又不支持 AGENTS.md 时才需要复制，
+其余项目不必创建。文件树中列出它是为了说明模板提供的形态，不代表每个项目都要装。
 
 docs/INITIALIZATION.md（本文件）不复制到目标项目：它说明的是如何初始化，初始化完成后不再适用。
 
@@ -103,12 +116,15 @@ docs/INITIALIZATION.md（本文件）不复制到目标项目：它说明的是�
 ~~~gitignore
 /.handoff/CONTEXT.md
 /.handoff/CHECKPOINT.md
-/.handoff/*.previous          # 含 CHECKPOINT.previous.md 与 .CHECKPOINT.md.previous
+/.handoff/*.previous.md        # 规范命名 CHECKPOINT.previous.md
+/.handoff/*.previous           # 旧命名 .CHECKPOINT.md.previous
 /.handoff/*.tmp.md
 ~~~
 
-previous 备份统一命名为 `.handoff/CHECKPOINT.previous.md`（见 HANDOFF.md 第 5 节）；
-存量项目若用其他命名（如 `.CHECKPOINT.md.previous`），`*.previous` 通配同样覆盖，不必改名。
+previous 备份统一命名为 `.handoff/CHECKPOINT.previous.md`（见 HANDOFF.md 第 5 节）。
+两条 previous 规则都要写：`*.previous` 要求文件名**以 `.previous` 结尾**，
+匹配不到规范命名 `CHECKPOINT.previous.md`（它以 `.md` 结尾），必须另写 `*.previous.md`；
+存量项目若用旧命名 `.CHECKPOINT.md.previous`，由 `*.previous` 覆盖，不必改名。
 
 ### 项目层：跟踪
 
@@ -138,9 +154,11 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 - 协议版本使用模板仓库的 commit SHA，不另造编号。
 - 在项目 MEMORY.md 记录：协议版本 SHA 与安装日期。
 - AGENTS.md 顶部写同一 SHA。
-- 升级＝整体覆盖协议层 5 个文件＋更新 SHA，随后核对章节引用仍可解析：
+- 升级＝整体覆盖协议层 3 个文件＋更新 SHA，随后核对章节引用仍可解析：
   `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md docs/*.md | sort -u`
-- 协议层文件在项目中应逐字节等于所标注 SHA 的模板版本；有差异即为待核实的私改。
+- 协议层 3 个文件（HANDOFF.md、PROMPTS.md、docs/AGENT-RULES.md）在项目中应逐字节等于
+  所标注 SHA 的模板版本；有差异即为待核实的私改。入口层（CLAUDE.md、adapters/ENTRY.md）
+  允许按项目适配，不参与该校验；核对入口时只确认它仍指向 AGENTS.md 且未复制规则正文。
 
 
 
