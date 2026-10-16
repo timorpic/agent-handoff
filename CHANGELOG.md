@@ -1,7 +1,7 @@
 # 版本变更
 
 > 尚无发布记录。只按实际变更及发布情况维护，不预填版本或发布日期。
-> 版本规则见 docs/AGENT-RULES.md 第 18 节，项目长期发布约定见 MEMORY.md。
+> 版本规则见 docs/AGENT-RULES.md 第 17 节，项目长期发布约定见 MEMORY.md。
 
 ## 未发布
 

@@ -29,7 +29,7 @@
 - ADR：未填或不适用。
 - 架构：docs/ARCHITECTURE.md 或项目已有文档。
 - 运行/验证：docs/DEVELOPMENT.md；部署流程：docs/DEPLOYMENT.md（如适用）。
-- Release：docs/AGENT-RULES.md 第 18 节，项目具体发布约定见 MEMORY.md。
+- Release：docs/AGENT-RULES.md 第 17 节，项目具体发布约定见 MEMORY.md。
 
 ## 工作项
 计划主记录：TODO.md 或既有任务系统的精确入口（待填）。

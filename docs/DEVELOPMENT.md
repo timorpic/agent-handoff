@@ -29,5 +29,5 @@
 遵循 HANDOFF.md；工具入口见 CLAUDE.md 和 adapters/ENTRY.md。
 
 ## 发布入口
-发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 18 节，执行与回滚见 DEPLOYMENT.md。
+发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 17 节，执行与回滚见 DEPLOYMENT.md。
 组件发布等流程只有实际存在时才补充。

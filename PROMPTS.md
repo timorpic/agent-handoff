@@ -27,7 +27,7 @@
 我已停止原工具写入，请按 AGENTS.md 和 HANDOFF.md 接管当前任务。
 读取 MEMORY、.handoff/CONTEXT.md 和 CHECKPOINT.md，核对
 project_id、task_id、上下文修订、当前分支、HEAD、所有相关未提交与未跟踪文件。
-按 docs/AGENT-RULES.md 第 17 节核对当前项目相关的 MEMORY、ADR 及正式需求。
+按 docs/AGENT-RULES.md 第 13 节核对当前项目相关的 MEMORY、ADR 及正式需求。
 先核查未知外部操作结果，避免重复发布或迁移。
 简要说明接管位置、差异和未验证项，更新 owner 和检查点后继续已有授权范围内的工作。
 不要自动启动、调度或向其他 Agent 派发任务。
@@ -51,7 +51,7 @@ project_id、task_id、上下文修订、当前分支、HEAD、所有相关未�
 
 ## 关键决策与长期知识
 
-作关键技术决策前，请按 docs/AGENT-RULES.md 第 17 节核对当前项目相关的
+作关键技术决策前，请按 docs/AGENT-RULES.md 第 13 节核对当前项目相关的
 MEMORY、ADR、需求与实际实现，不自动继承其他项目结论。
 结论确认后更新 MEMORY / ADR，记录稳定条目 ID、确认依据、适用范围和替代关系。
 不把临时待办、检查点或聊天全文写入长期知识。

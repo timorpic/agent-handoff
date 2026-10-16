@@ -126,7 +126,7 @@
 <!-- Conventional Commits 或其他规范 -->
 
 ### Release
-- 规则：docs/AGENT-RULES.md 第 18 节；版本采用 vx.MM.xx，不表示语义化兼容性。
+- 规则：docs/AGENT-RULES.md 第 17 节；版本采用 vx.MM.xx，不表示语义化兼容性。
 - 基准年：待首次正式发版确认；已有项目填已确认年份，不默认取当前年份。
 - 时区：Asia/Shanghai（项目明确另有约定时填写实际时区）。
 - 正式发布渠道及目标：待确认。
@@ -163,7 +163,7 @@
 ## 10. 经验与避坑
 
 > 只记经过核实、对未来有复用价值的经验；未发生时不填造案例。
-> 维护和归档遵循 docs/AGENT-RULES.md 第 17.2 节。
+> 维护和归档遵循 docs/AGENT-RULES.md 第 13.4 节。
 
 ### 经验模板
 
@@ -221,6 +221,7 @@
 ## 13. 跨工具身份与长期知识索引
 
 - 稳定 project_id：待填写（首次取目标仓库名，无仓库取目标工作目录名；不使用模板目录名；确定后保持稳定）。
+- 协议版本：待填写（模板仓库 commit SHA 与安装日期；升级协议层后同步更新）。
 - 接力入口：.handoff/CONTEXT.md。
 - 检查点：.handoff/CHECKPOINT.md。
 - 接力协议：HANDOFF.md。
