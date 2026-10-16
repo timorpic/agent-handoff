@@ -67,7 +67,6 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 ## 首次使用
 
 1. 将模板文件及 .handoff 点目录复制到目标项目；已有同名文件先核对并合并，不能直接覆盖。
-   在目标项目初始化前，先按下方“模板文件的 Git 跟踪策略”配置并验证忽略规则。
 2. 确认目标项目根目录和稳定 project_id，写入 MEMORY；不使用模板目录或下载包名。
 3. 按当前项目填写 README、PROJECT-SPEC、ARCHITECTURE 和 DEVELOPMENT；未知信息保留待确认。
    部署流程尚未确定时 DEPLOYMENT 保持空白；没有 UI 时 DESIGN 标明不适用。
@@ -76,49 +75,6 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 引导工具�
 6. 使用工具原生支持的规则入口；Claude Code 使用 CLAUDE.md，支持 AGENTS.md 的工具使用根目录 AGENTS.md。
    入口未加载或工具无对应机制时，可显式使用 adapters/ENTRY.md。
    在实际工具中核实文件已读取，入口未加载时使用 PROMPTS 中的显式提示。
-
-## 模板文件的 Git 跟踪策略
-
-接入目标项目时，以下 18 个模板文件仅保留在本地，不纳入目标项目的 Git 跟踪。
-本策略也适用于 README、需求、架构、开发和部署等清单内文档；
-目标项目已有同名文件时保留其内容及用户修改，取消跟踪前核对索引差异。
-模板源仓库自身继续跟踪这些文件，以便维护和分发，不对源仓库执行此策略。
-
-将以下根目录锚定路径逐项加入目标项目的 `.gitignore`，保留既有规则并避免重复：
-
-~~~gitignore
-/AGENTS.md
-/CLAUDE.md
-/README.md
-/MEMORY.md
-/HANDOFF.md
-/PROMPTS.md
-/TODO.md
-/DESIGN.md
-/CHANGELOG.md
-/.handoff/CONTEXT.md
-/.handoff/CHECKPOINT.md
-/adapters/ENTRY.md
-/docs/AGENT-RULES.md
-/docs/INITIALIZATION.md
-/docs/PROJECT-SPEC.md
-/docs/ARCHITECTURE.md
-/docs/DEVELOPMENT.md
-/docs/DEPLOYMENT.md
-~~~
-
-- 不整体忽略 `.handoff/`、`adapters/` 或 `docs/`，不自动扩展到清单外文件。
-- 未跟踪的文件只配置忽略；已跟踪的文件使用 `git rm --cached -- <路径>` 取消跟踪，
-  命令路径不带开头的 `/`。不得删除本地文件或使用 `-f` 强制丢弃暂存差异。
-- 遇到索引与工作区内容冲突时保留现场，说明具体路径及差异，先完成其他可独立操作。
-- 配置后逐项核对本地文件仍存在、内容未变，并用 `git ls-files -- <路径>` 确认索引中无目标文件，
-  用 `git check-ignore -v -- <路径>` 确认忽略生效；只写 `.gitignore` 不代表已取消跟踪。
-- 不存在的文件不创建空文件，保留对应忽略规则以覆盖后续初始化生成的文件，并汇报缺失项。
-- 非 Git 项目先准备根目录 `.gitignore`，明确跟踪验证尚未运行；执行 `git init` 后补验再暂存文件。
-- `.gitignore` 本身可纳入目标项目的版本控制；提交、推送仍需已有授权。
-- 对已跟踪文件取消跟踪后，提交会使其从仓库当前版本中移除，历史提交仍保留；
-  协作者拉取时可能删除其原有受跟踪副本，应在交付说明中明确此影响。
-- 被忽略文件不随普通 Git 克隆、拉取或推送传递，跨机接力须按 HANDOFF.md 核实本地副本。
 
 ## 避免重复维护
 
