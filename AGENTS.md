@@ -11,6 +11,7 @@
 2. 首次进入项目先读取 docs/AGENT-RULES.md 第 1–14 节；本会话已读且未变化时无需重复。
 3. 读取 MEMORY.md、.handoff/CONTEXT.md 和 .handoff/CHECKPOINT.md（如存在），确认项目身份、目标与实际现场。
    模板仍为空白时按当前项目初始化；没有实际任务时保留 draft，不虚构历史。
+   后两者属现场层（不进 Git）：新克隆或换机器时可能不存在，此时按当前现场重建，不虚构前任记录。
    模板文件在目标项目中的 Git 归属按 docs/INITIALIZATION.md「模板文件的 Git 跟踪策略」执行。
 4. 开始新任务、接手或作关键决策前，核对稳定 project_id、MEMORY.md 及相关正式文档；
    长期知识的读取与维护遵循详细规则第 13 节，不导入其他项目事实。
