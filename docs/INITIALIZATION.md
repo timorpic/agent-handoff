@@ -144,8 +144,10 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 - 取消跟踪已跟踪文件时用 `git rm --cached -- <路径>`；不加 `-f`，不删除本地文件。
 - 逐项核对：本地文件仍存在且内容未变、`git ls-files` 中无该路径、`git check-ignore -v` 忽略生效。
 - 非 Git 项目先备好根目录 `.gitignore`，执行 `git init` 后补验。
-- **新克隆自检**：克隆到临时目录，确认工具入口、AGENTS.md 的全部链接、
-  docs/AGENT-RULES.md 与 HANDOFF.md 均存在。
+- **新克隆自检**：克隆到临时目录，确认工具入口、docs/AGENT-RULES.md 与 HANDOFF.md 均存在，
+  并逐条检查 AGENTS.md 的项目层与协议层链接可解析。
+  现场层（`.handoff/CONTEXT.md`、`.handoff/CHECKPOINT.md`）在克隆中**应当缺失**，属预期：
+  入口对它们的引用必须带「如存在」或等效说明，缺失时按当前现场重建，不虚构前任记录。
 
 ### 协议版本锚定
 
