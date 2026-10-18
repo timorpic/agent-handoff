@@ -38,7 +38,9 @@
 - [规则入口](AGENTS.md) / [详细工作规则](docs/AGENT-RULES.md)
 - [长期知识](MEMORY.md)
 - [人工接力协议](HANDOFF.md)
-- [当前任务](.handoff/CONTEXT.md) / [执行现场](.handoff/CHECKPOINT.md)
+- [人工使用提示词](PROMPTS.md)
+- [工具适配入口](adapters/ENTRY.md)（按需复制）
+- [当前任务](.handoff/CONTEXT.md) / [执行现场](.handoff/CHECKPOINT.md)（如存在；新克隆中缺失属预期）
 
 ## 许可证
 

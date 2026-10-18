@@ -7,6 +7,7 @@
 
 按 AGENTS.md 核对 MEMORY、CONTEXT、CHECKPOINT、项目身份和实际文件，
 完成适用章节及相关文档读取后再修改。
+文档一致性自检：`sh scripts/check-docs.sh`（只读，检查死链、章节引用、认领状态枚举与跟踪状态）。
 接力、异常恢复遵循 HANDOFF.md。
 输入或工具输出被截断时补读，不声称已读取未见内容。
 

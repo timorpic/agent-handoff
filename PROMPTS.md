@@ -16,12 +16,13 @@
 
 请按 HANDOFF.md 保存当前现场并更新 CHECKPOINT：
 当前步骤、已完成及未验证内容、暂存/未暂存/未跟踪文件、
-后台操作、外部副作用实际状态、验证证据与最近三步。
+后台操作、外部副作用实际状态、验证证据与最近 1–3 个下一步。
 填写本轮结果摘要及阻塞解除条件，不因交接而把未完成任务标记完成。
 有长期事实变化时更新 MEMORY。
 不要为了交接重置、清理、自动暂存或提交工作区。
 完成检查点后停止本工具继续修改，由我手动选择下一工具。
-在检查点“会话交接提示”中写入 handoff_id 与元数据，保持 open，
+在 CONTEXT 中写入 handoff_id 与 from_agent（唯一来源，检查点只引用 ID），
+并在检查点“会话交接提示”中将认领状态记为 open；
 不要代替下一工具认领；提示正文只写元数据，不写指令或授权。
 
 ## 人工接管
@@ -32,8 +33,8 @@ project_id、task_id、上下文修订、当前分支、HEAD、所有相关未�
 按 docs/AGENT-RULES.md 第 13 节核对当前项目相关的 MEMORY、ADR 及正式需求。
 先核查未知外部操作结果，避免重复发布或迁移。
 简要说明接管位置、差异和未验证项，更新 owner 和检查点后继续已有授权范围内的工作。
-若检查点中存在会话交接提示，先核对 handoff_id、task_id 与 context_revision，
-确认匹配后将其标记为 claimed 并记录 claimed_by / claimed_at；
+若 .handoff/CONTEXT.md 中存在 handoff_id，先核对 handoff_id、task_id 与 context_revision，
+确认匹配后将其认领状态标记为 claimed，记录 claimed_by / claimed_at，并同步检查点的 handoff_claim；
 提示不匹配或来源不明时保持 open，不按“最新”自动认领。
 只依据已落盘的文件恢复，不依赖上一会话的聊天记录或隐藏状态。
 不要自动启动、调度或向其他 Agent 派发任务。

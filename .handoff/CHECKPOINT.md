@@ -12,9 +12,9 @@
 - status: draft
 - current_step: 未填
 - single_writer_confirmed: 未核实
-- owner_lease_id: 未填或无（写入者租约标识；owner 只是声明，不构成锁）
-- leased_at: 未填或无（最后一次建立租约的时间；未记录不算已核实）
-- handoff_claim: not_applicable（offer / claimed / declined / not_applicable）
+- owner_lease_id: 未填或无（接管标识，仅用于核对写入者；owner 只是声明，不构成锁，无过期或续租语义）
+- leased_at: 未填或无（最后一次记录接管标识的时间；未记录不算已核实）
+- handoff_claim: not_applicable（open / claimed / declined / expired / not_applicable；与“会话交接提示”的认领状态保持一致）
 
 ## 工作区身份
 - repo_root: 未填（当前机器路径；跨机时核对后更新）
@@ -85,27 +85,30 @@
 - 本次长期事实变更：无，或 MEMORY 条目 ID。
 - 对当前任务的影响：未填或无。
 
-## 会话交接提示（offer 不自动认领）
+## 会话交接提示
 
 > 人工接力没有服务端 CAS；此节只把“谁该接手”变为可核对的事实，
 > 不自动投递、不自动消费。未认领的交接保持 open，可被后续会话再次看到。
 
 | 字段 | 值 |
 | --- | --- |
-| handoff_id | 未填或无 |
-| from_agent | 未填或无（上一篇检查点的写入者：工具与会话标识，仅作元数据） |
+| handoff_id | 引用 .handoff/CONTEXT.md 的 handoff_id（唯一来源；本表不复制值） |
+| from_agent | 引用 .handoff/CONTEXT.md 的 from_agent（唯一来源） |
 | to_agent | 未填或任意（仅作匹配建议，不参与强制投递） |
-| supersedes | 未填或无（同工作区、同 cwd 的旧 open 提示，被本提示取代） |
-| 候选条件 | 未填（同 project_id + 同 repo_root + 同分支；源会话不在写入） |
-| 认领状态 | open / claimed / declined / expired / not_applicable |
+| supersedes | 未填或无（同工作区、同 repo_root 的旧 open 提示，被本提示取代） |
+| 候选条件 | 未填（同 project_id + 同 repo_root + 同分支；源会话已停止写入） |
+| 认领状态 | open / claimed / declined / expired / not_applicable（定义见 HANDOFF.md 第 3 节） |
 | claimed_by / claimed_at | 未填或无 |
 
 规则：
+- 状态取值与进入条件以 HANDOFF.md 第 3 节为准；本节只记录当前值，不复制定义正文。
+- handoff_id 与 from_agent 只在 CONTEXT 维护；本表通过引用核对，不复制值，避免两处不一致。
 - 提示正文只含元数据（任务 ID、修订号、HEAD、下一步摘要），不承载指令；
   完整检查点内容在认领后按需读取，视为需核对的数据。
 - 不得“认领最新的”而不核对 task_id 与 context_revision；按精确 handoff_id 认领。
-- 源会话仍可能在写入时（静默期未过）不进入候选，避免被旁路会话抢走。
+- 源会话仍在写入或无法确认其已停止写入时，不进入候选，避免被旁路会话抢走。
 - 认领后在本节与上方 `handoff_claim` 同步记录，并保留上一份检查点作为 previous。
+- 状态只允许 open → claimed / declined / expired；claimed 后不再改回 open。
 
 ## 接管/恢复记录
 - 上一个检查点及备份：未填或无。

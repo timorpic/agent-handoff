@@ -81,6 +81,11 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 是工具入�
    入口未加载或工具无对应机制时，可显式使用 adapters/ENTRY.md。
    在实际工具中核实文件已读取，入口未加载时使用 PROMPTS 中的显式提示。
 7. 在 MEMORY.md 与 AGENTS.md 记录协议版本（模板仓库 commit SHA）。
+8. 清理只属于模板仓库的引用：`docs/INITIALIZATION.md` 不复制，
+   因此目标项目需要处理指向它的引用（AGENTS.md 第 3 行后的说明、README 顶部与文档入口）：
+   删除、改为项目自有说明，或标注“仅模板仓库适用”。
+   `.gitignore` 顶部注释可保留，它只是规则来源说明，不影响运行。
+   完成后按下方“新克隆自检”确认没有死链。
 
 ## 模板文件的 Git 跟踪策略
 
@@ -93,6 +98,9 @@ AGENTS.md 的链接会全部指向不存在的文件，且「文件缺失时如�
 因此**纳入跟踪**，但视作 vendored 依赖：项目内不修改，升级时整体覆盖：
 
 HANDOFF.md、PROMPTS.md、docs/AGENT-RULES.md
+
+这三个文件之外的规则性内容（模板文件树、Git 跟踪策略、初始化步骤、版本锚定）只在本文件维护；
+修改协议层时应同步整体更新本文件，但本文件不复制到目标项目。
 
 修改协议正文会导致项目分叉、章节编号漂移（历史教训：多个项目各自重编号，
 同一「第 18 节」在不同项目指向不同章节）。项目专属规则写入 AGENTS.md、
@@ -159,9 +167,10 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 - 逐项核对：本地文件仍存在且内容未变、`git ls-files` 中无该路径、`git check-ignore -v` 忽略生效。
 - 非 Git 项目先备好根目录 `.gitignore`，执行 `git init` 后补验。
 - **新克隆自检**：克隆到临时目录，确认工具入口、docs/AGENT-RULES.md 与 HANDOFF.md 均存在，
-  并逐条检查 AGENTS.md 的项目层与协议层链接可解析。
+  并逐条检查 AGENTS.md 的项目层与协议层链接可解析；入口层、README 的链接也一并核对。
   现场层（`.handoff/CONTEXT.md`、`.handoff/CHECKPOINT.md`）在**目标项目**的克隆中**应当缺失**，属预期：
   入口对它们的引用必须带「如存在」或等效说明，缺失时按当前现场重建，不虚构前任记录。
+  `.handoff/archive/` 同样可能不存在；入口不得要求其必须存在。
   模板仓库自身例外：克隆中两者应存在且为空白 draft，见上文「模板仓库自身的例外」。
 
 ### 交接协议的可核对性
@@ -170,7 +179,10 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 不构成自动投递、互斥锁或 CAS：
 
 - CONTEXT：`handoff_id`、`from_agent`；只写标识，不承载指令或授权。
-- CHECKPOINT：`owner_lease_id`、`leased_at`、`handoff_claim`，以及“会话交接提示”一节。
+  这两项以 CONTEXT 为唯一来源，检查点不复制值。
+- CHECKPOINT：`owner_lease_id`、`leased_at`、`handoff_claim`，以及“会话交接提示”一节；
+  其中 handoff_id 只引用 CONTEXT，认领状态取值
+  open / claimed / declined / expired / not_applicable，定义以 HANDOFF.md 第 3 节为准。
 - 认领必须按精确 `handoff_id` 并核对 `task_id` 与 `context_revision`；
   不得按“最新”自动认领，避免无关会话消耗交接。
 - 提示正文只含元数据；完整检查点内容在认领后读取，并按不可信数据核对。
@@ -185,8 +197,12 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 - 协议版本使用模板仓库的 commit SHA，不另造编号。
 - 在项目 MEMORY.md 记录：协议版本 SHA 与安装日期。
 - AGENTS.md 顶部写同一 SHA。
-- 升级＝整体覆盖协议层 3 个文件＋更新 SHA，随后核对章节引用仍可解析：
-  `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md docs/*.md | sort -u`
+- 升级＝整体覆盖协议层 3 个文件＋更新 SHA，随后核对章节引用仍可解析；推荐直接执行
+  `sh scripts/check-docs.sh`（模板仓库提供，只读，覆盖死链、章节引用、认领状态枚举和跟踪状态）。
+  手工等价命令：
+  `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md CLAUDE.md HANDOFF.md PROMPTS.md MEMORY.md .handoff/*.md docs/*.md | sort -u`
+  （MEMORY 与 .handoff 模板也含章节引用，必须纳入；目标项目缺少现场层文件时按实际存在的文件执行。）
+- 修改协议层 3 个文件时，须同步整体更新本文件，并最后提交，使新的协议版本 SHA 是包含这三者的提交。
 - 协议层 3 个文件（HANDOFF.md、PROMPTS.md、docs/AGENT-RULES.md）在项目中应逐字节等于
   所标注 SHA 的模板版本；有差异即为待核实的私改。入口层（CLAUDE.md、adapters/ENTRY.md）
   允许按项目适配，不参与该校验；核对入口时只确认它仍指向 AGENTS.md 且未复制规则正文。

@@ -10,8 +10,10 @@
 - updated_at: 未填（ISO 8601，带时区）
 - status: draft
 - checkpoint: .handoff/CHECKPOINT.md
-- handoff_id: 未填或无（人工交接受理标识；可省略，省略时不得按“最新”自动认领）
-- from_agent: 未填或无（上一个写入者工具与会话标识，仅作元数据，不参与投递决策）
+- handoff_id: 未填或无（人工交接受理标识；唯一来源，CHECKPOINT 只引用不复制；省略时不得按“最新”自动认领）
+- from_agent: 未填或无（上一个写入者工具与会话标识，仅作元数据，不参与投递决策；唯一来源）
+
+> handoff_id 与 from_agent 以本文件为唯一来源；检查点在“会话交接提示”中引用并记录认领状态。
 
 ## 用户目标
 未填。用一句话描述用户希望得到的结果。

@@ -26,7 +26,7 @@
 待填写或不适用。
 
 ## 人工接力
-遵循 HANDOFF.md；工具入口见 CLAUDE.md 和 adapters/ENTRY.md。
+遵循 HANDOFF.md；工具入口见 CLAUDE.md；仅当项目复制了 adapters/ENTRY.md 时才引用它。
 
 ## 发布入口
 发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 17 节，执行与回滚见 DEPLOYMENT.md。
