@@ -13,6 +13,7 @@
 ├── TODO.md                    # 任务计划与依赖                   [项目层·跟踪]
 ├── HANDOFF.md                 # P0+P1 人工接力协议               [协议层·跟踪,禁改]
 ├── PROMPTS.md                 # 初始化、交接与恢复提示           [协议层·跟踪,禁改]
+├── .gitignore                 # 现场层忽略规则；复制到目标项目   [项目层·跟踪]
 ├── .handoff/
 │   ├── CONTEXT.md             # 活动任务目标与验收入口           [现场层·不跟踪]
 │   ├── CHECKPOINT.md          # 执行现场、验证与下一步           [现场层·不跟踪]
@@ -136,6 +137,19 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 `MEMORY.md` 记录 DEC / LES 长期条目，不跟踪会导致新克隆丢失全部积累，必须纳入。
 `.handoff/archive/**` 是冻结的历史证据，同样跟踪。
 
+### 模板仓库自身的例外：跟踪空白现场层
+
+本模板仓库（分发载体）**保留** `.handoff/CONTEXT.md` 与 `.handoff/CHECKPOINT.md` 的跟踪，
+与其他项目相反。判据不变——仍然只跟踪「协议正文、项目事实、工具入口」，
+但本仓库分发的正是这些空白模板：`git clone` 只能取得被跟踪的文件，
+若在此取消跟踪，克隆者拿不到点目录，首次使用第 1 步「复制 .handoff 点目录」无法执行。
+
+- 根目录 `.gitignore` 照样写入现场层忽略规则：忽略只作用于未跟踪文件，
+  不影响两者的跟踪状态；目标项目初始化执行 `git rm --cached` 后规则立即生效。
+- 本仓库中的这两份文件必须保持**空白 draft**，不写入模板制作过程、会话记录或测试结果；
+  一旦被当作实际工作现场填写，就应改为不跟踪。
+- 该例外只适用于模板仓库本身；目标项目必须按上文取消跟踪，不得沿用。
+
 ### 执行要求
 
 - 只忽略现场层；用锚定路径，不写 `.handoff/` 或 `docs/` 整体忽略，否则会连带吞掉归档和项目文档。
@@ -146,8 +160,9 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 - 非 Git 项目先备好根目录 `.gitignore`，执行 `git init` 后补验。
 - **新克隆自检**：克隆到临时目录，确认工具入口、docs/AGENT-RULES.md 与 HANDOFF.md 均存在，
   并逐条检查 AGENTS.md 的项目层与协议层链接可解析。
-  现场层（`.handoff/CONTEXT.md`、`.handoff/CHECKPOINT.md`）在克隆中**应当缺失**，属预期：
+  现场层（`.handoff/CONTEXT.md`、`.handoff/CHECKPOINT.md`）在**目标项目**的克隆中**应当缺失**，属预期：
   入口对它们的引用必须带「如存在」或等效说明，缺失时按当前现场重建，不虚构前任记录。
+  模板仓库自身例外：克隆中两者应存在且为空白 draft，见上文「模板仓库自身的例外」。
 
 ### 协议版本锚定
 

@@ -1,0 +1,13 @@
+# 现场层：不跟踪，每次会话重写
+# 规则来源：docs/INITIALIZATION.md「模板文件的 Git 跟踪策略」
+/.handoff/CONTEXT.md
+/.handoff/CHECKPOINT.md
+/.handoff/*.previous.md
+/.handoff/*.previous
+/.handoff/*.tmp.md
+
+# 本模板仓库的例外：空白 CONTEXT/CHECKPOINT 作为分发模板保留跟踪，
+# 否则 git clone 后无法执行「复制 .handoff 点目录到目标项目」。
+# 忽略规则只作用于未跟踪文件，不影响两者的跟踪状态；
+# 目标项目初始化时执行 git rm --cached 后，上述规则即生效。
+# .handoff/archive/ 属冻结历史证据，必须跟踪，不在此忽略。
