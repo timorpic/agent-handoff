@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> 协议版本：9eaa551（模板仓库 commit SHA，2026-10-18）。
+> 协议版本：c76493b（模板仓库 commit SHA，2026-10-18）。
 > 项目启动入口。详细工作规则统一维护在 docs/AGENT-RULES.md。
 > 下面的读取要求是工作步骤；不能只读本入口而忽略适用的详细规则。
 > 项目专属规则写在本文件或 docs/DEVELOPMENT.md、MEMORY.md；不改协议层正文。
