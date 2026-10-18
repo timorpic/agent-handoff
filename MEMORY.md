@@ -221,7 +221,7 @@
 ## 13. 跨工具身份与长期知识索引
 
 - 稳定 project_id：待填写（首次取目标仓库名，无仓库取目标工作目录名；不使用模板目录名；确定后保持稳定）。
-- 协议版本：9eaa551（2026-10-18；模板仓库 commit SHA。本仓库即模板仓库，SHA 指向最后一次修改协议层正文的提交 HANDOFF.md、PROMPTS.md、docs/AGENT-RULES.md；升级协议层后同步更新）。
+- 协议版本：9eaa551（模板仓库 commit SHA；安装日期 2026-10-18；升级协议层后同步更新）。
 - 接力入口：.handoff/CONTEXT.md。
 - 检查点：.handoff/CHECKPOINT.md。
 - 接力协议：HANDOFF.md。
