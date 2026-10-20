@@ -20,6 +20,8 @@
    按需读取 skills/<name>/SKILL.md，不预先加载全部技能。
 6. 按下表读取本次适用章节和相关正式文档，再修改代码。按章节读取；
    输出被截断时继续补读，不默认将整本详细规则或全部历史一次加载。
+7. 接管或恢复时如有 scripts/handoff.mjs，先用 inspect 只读核对，再按
+   docs/HANDOFF-HELPER.md 用 claim 保存接管记录后修改业务文件；小步骤结束用 save 保存结果。
 
 ## 按任务读取
 

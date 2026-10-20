@@ -6,7 +6,7 @@
 # 检查项：
 #   1. Markdown 相对链接目标是否存在（含 .handoff 现场层缺失的例外说明）。
 #   2. “<文件> 第 N[.M] 节”引用的章节标题是否存在于该文件。
-#   3. CHECKPOINT 的 handoff_claim 与“认领状态”枚举是否一致且包含 open。
+#   3. CHECKPOINT 的 handoff_claim 与“认领状态”是否为一致的合法单值（draft 模板可保留枚举）。
 #   4. 现场层 Git 跟踪状态：模板仓库应跟踪，目标项目应不跟踪但被忽略。
 #   5. 目标项目（无 docs/INITIALIZATION.md）是否仍引用模板专属文件。
 #   6. 模板仓库的 CONTEXT/CHECKPOINT 是否保持 draft。
@@ -166,28 +166,32 @@ while IFS='	' read -r file doc num; do
 	fi
 done <"$tmpdir/section-refs.uniq"
 
-# ---------- 3. 认领状态枚举 ----------
+# ---------- 3. 认领状态 ----------
 ckpt=.handoff/CHECKPOINT.md
 if [ -f "$ckpt" ]; then
-	claim_line=$(grep -a -m1 '^- handoff_claim:' "$ckpt")
-	claim_line=${claim_line#*（}
-	claim_line=${claim_line%%）*}
-	claim_line=${claim_line%%；*}
-	claimed_field=$(printf '%s\n' "$claim_line" | tr '/' '\n' |
-		sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -a -v '^$' | sort -u)
+	claimed_field=$(grep -a -m1 '^- handoff_claim:' "$ckpt" |
+		sed 's/^- handoff_claim:[[:space:]]*//; s/（.*//; s/[[:space:]]*$//')
 	claim_row=$(grep -a -m1 '^| 认领状态 |' "$ckpt" |
 		sed 's/^| 认领状态 |//; s/|.*$//' |
 		sed 's/（.*//' |
 		tr '/' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -a -v '^$' | sort -u)
+	allowed_claims=$(printf '%s\n' open claimed declined expired not_applicable | sort -u)
+	checkpoint_status=$(grep -a -m1 '^- status:' "$ckpt" |
+		sed 's/^- status:[[:space:]]*//; s/[[:space:]]*$//')
+	case "$claimed_field" in
+	open|claimed|declined|expired|not_applicable) ;;
+	*) err "$ckpt 的 handoff_claim 不是合法状态：$claimed_field" ;;
+	esac
 	if [ -z "$claimed_field" ] || [ -z "$claim_row" ]; then
-		err "未能从 $ckpt 解析 handoff_claim 或“认领状态”枚举"
+		err "未能从 $ckpt 解析 handoff_claim 或“认领状态”"
+	elif [ "$checkpoint_status" = draft ] && [ "$claimed_field" = not_applicable ] &&
+		[ "$claim_row" = "$allowed_claims" ]; then
+		: # 空白 draft 模板保留完整枚举；活动现场必须填写实际状态。
 	else
 		if [ "$claimed_field" != "$claim_row" ]; then
-			err "handoff_claim 与“认领状态”枚举不一致："
+			err "handoff_claim 与“认领状态”不一致："
 			printf '  字段: %s\n  表格: %s\n' "$(echo "$claimed_field" | tr '\n' ' ')" "$(echo "$claim_row" | tr '\n' ' ')" >&2
 		fi
-		printf '%s\n' "$claim_row" | grep -a -qx 'open' ||
-			err "认领状态枚举缺少 open（PROMPTS 要求未认领时保持 open）"
 	fi
 fi
 

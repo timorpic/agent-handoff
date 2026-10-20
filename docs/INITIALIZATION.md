@@ -1,12 +1,42 @@
 # 初始化与使用
 
+## 项目定位：跨工具任务接力
+
+本项目解决同一编程任务在不同工具之间的连续执行：例如 Codex 额度耗尽后，
+由用户切换到 Claude Code，接手工具依据项目文件和检查点继续尚未完成的工作。
+
+- 核心能力：统一规则、长期知识、任务目标、执行现场、验证证据与可执行的下一步。
+- 正常切换：旧工具保存现场，用户停止其写入并打开新工具，新工具核验后继续。
+- 突然中断：额度耗尽而来不及交接时，新工具从最后有效检查点与实际文件重建现场，
+  区分已证实、推测和未知，不依赖旧工具再生成一份交接说明。
+- 当前非目标：跨工具并发编排、任务分发、自动探测额度或自动切换工具。
+- 工具内部如何并发由各工具自身负责，本项目不提供或调度该能力；
+  切换时仍需确认旧工具及其派生任务已停止写入。
+
+“无缝继续”的验收重点是：已有文件能回答任务目标、已完成与未完成事项、验证状态和下一步，
+用户无需重新描述这些已记录信息。它不表示迁移聊天全文、模型内部状态或未保存的编辑内容。
+接力与异常恢复步骤统一见 [HANDOFF.md](../HANDOFF.md)，不另建并发调度流程。
+
+本节记录模板仓库的定位；分发给目标项目的 README、需求与 MEMORY 仍按目标项目填写，
+不得将模板本身的定位或维护记录带入目标项目。
+
+### 本地接力助手
+
+`scripts/handoff.mjs` 提供只读核对（inspect）、接管提示（prompt）、
+接管记录（claim）和结果保存（save）。使用方式及边界见
+[本地接力助手](HANDOFF-HELPER.md)。
+
+模板不预填项目身份、任务、运行现场或验证结论。初始化后，
+由目标项目根据实际情况填写；模板维护与测试过程不作为目标项目的历史或授权。
+
 ## 模板文件树
 
 ~~~text
 项目根目录/
 ├── AGENTS.md                  # 规则入口 SSOT（精简）＋章节路由   [项目层·跟踪]
 ├── CLAUDE.md                  # Claude Code 工具入口             [入口层·跟踪,可适配]
-├── README.md                  # 项目简介与快速开始               [项目层·跟踪]
+├── README.project.md          # 空白项目 README 样板（仅模板仓库）
+├── README.md                  # 模板介绍；目标项目为自己的说明               [项目层·跟踪]
 ├── MEMORY.md                  # 长期知识与决策索引               [项目层·跟踪]
 ├── DESIGN.md                  # 视觉与交互规范（无 UI 时不适用） [项目层·跟踪]
 ├── CHANGELOG.md               # 版本变更与升级说明               [项目层·跟踪]
@@ -34,11 +64,15 @@
 │   └── scoped/MODULE-AGENTS.md  # 局部作用域 AGENTS.md 模板
 ├── scripts/
 │   ├── check-docs.sh          # 只读一致性自检                   [项目层·跟踪]
+│   ├── bootstrap.sh          # 下载模板并调用生成器（模板专用）
 │   ├── init.mjs               # 零依赖骨架生成器                 [项目层·跟踪]
+│   ├── handoff.mjs            # 本地接力检查、认领与结果保存     [项目层·跟踪]
+│   ├── handoff.test.mjs       # 接力集成回归（仅模板仓库需要）   [项目层·跟踪]
 │   └── init.test.mjs          # 生成器回归自测（仅模板仓库需要） [项目层·跟踪]
 └── docs/
     ├── INITIALIZATION.md      # 本文件；不复制到目标项目         [仅模板仓库]
     ├── MULTI-AGENT.md         # 客户端映射、作用域与避坑         [项目层·跟踪]
+    ├── HANDOFF-HELPER.md      # 本地接力助手与验收、结果格式     [项目层·跟踪]
     ├── AGENT-RULES.md         # 开发、记忆、Release 与接力规则   [协议层·跟踪,禁改]
     ├── PROJECT-SPEC.md        # 产品目标、范围与验收             [项目层·跟踪]
     ├── ARCHITECTURE.md        # 系统架构与模块边界               [项目层·跟踪]
@@ -63,8 +97,12 @@
 | CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则（允许按项目适配） |
 | docs/MULTI-AGENT.md | 客户端入口映射、分层作用域、技能共享与跨平台避坑 |
 | skills/<name>/SKILL.md | 可复用工作流（前置元数据＋步骤＋验证要求），按需读取 |
+| scripts/bootstrap.sh | 下载模板并初始化；`bash scripts/bootstrap.test.sh` 验证下载入口 |
 | scripts/init.mjs | 零依赖骨架生成器：复制模板并建立链接或回退形态 |
 | scripts/init.test.mjs | 生成器的端到端回归自测：`node scripts/init.test.mjs`，退出码 0 表示全部通过 |
+| scripts/handoff.mjs | 本地接力助手：只读现场、精确认领、合规检查点与完整备份 |
+| scripts/handoff.test.mjs | 接力助手集成回归：`node --test scripts/handoff.test.mjs`，仅模板仓库需要 |
+| docs/HANDOFF-HELPER.md | 助手验收约定、命令与结果 JSON 格式及能力边界 |
 | scripts/check-docs.sh | 只读一致性自检：死链、章节引用、技能元数据、链接解析、跟踪状态 |
 | MEMORY.md | 当前有效的长期知识及决策索引 |
 | DESIGN.md | 有 UI 的项目采用的视觉与交互规范 |
@@ -95,6 +133,43 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 是工具入�
 ## 首次使用
 
 推荐用脚本生成，再按项目填写；手工复制时按同样顺序执行。
+
+### 下载并初始化（无需先克隆模板）
+
+只需要 Bash、curl、tar 和常见系统工具（macOS、Linux 或 Windows Git Bash）；初始化不依赖 Git、Node.js。先进入项目文件夹，再下载并运行入口脚本：
+
+~~~sh
+curl -fL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh -o /tmp/agent-handoff-bootstrap.sh
+bash /tmp/agent-handoff-bootstrap.sh
+~~~
+
+也可在项目文件夹内一键运行（执行仓库当前版本脚本）：
+
+~~~sh
+curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh | bash
+~~~
+
+可将脚本保存在自己的工具目录，以后进入项目文件夹直接运行即可。
+脚本始终初始化命令运行时的当前目录，不支持 `--target`，与脚本保存位置无关。
+固定从公开仓库 `timorpic/agent-handoff` 下载压缩包，默认分支为 main；`--ref <分支或Tag>` 可选择版本。
+需要预览时加 `--dry-run`，不支持软链时加 `--no-symlink`。
+下载入口只负责当前目录的首次初始化；局部入口可按模板手工建立。
+可选 `--project-id <标识>` 会同步写入 MEMORY 和两份空白现场记录；省略时均保留未填写。
+
+下载到系统临时目录，正常结束或报错后清理；不复制模板的 `.git`、维护文档和测试文件，
+不创建 Git 仓库，不提交、不推送。默认同名文件冲突时停止，保留已有内容；
+已有普通 README.md 会保留且不阻止初始化；没有时从 README.project.md 生成空白 README。
+模板仓库 README.md 不分发。此入口不提供覆盖开关，其余同名文件应人工核对并合并。
+下载失败或发现冲突时不写入项目；写入期间的磁盘错误可能留下部分文件，需核对后重试。
+初始化期间不要让其他工具同时写入该目录。
+初始化只复制文件；后续如使用可选的 `handoff.mjs` 或 `init.mjs`，这些工具仍需要 Node.js。
+远程模板将作为代码执行，只使用信任的仓库和版本。
+
+### 已有本地模板
+
+本地生成器同样保留已有 README.md；缺失时从 README.project.md 生成空白项目说明，
+不复制模板介绍。即使指定 `--force`，也保留已有的普通 README.md 文件。
+
 
 一键生成：
 

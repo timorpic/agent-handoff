@@ -27,6 +27,9 @@
 
 ## 人工接力
 遵循 HANDOFF.md；工具入口见 CLAUDE.md；仅当项目复制了 adapters/ENTRY.md 时才引用它。
+提供本地助手时，先执行 `node scripts/handoff.mjs inspect`，按
+[接力助手说明](HANDOFF-HELPER.md) 先 `claim` 再修改业务文件，用 `save` 保存完整结果和检查点。
+助手不证明旧工具已停止写入，也不替代业务验收。
 
 ## 多 Agent 接入与共享技能
 - 规则入口唯一：根 AGENTS.md；客户端入口只引用，不复制正文。

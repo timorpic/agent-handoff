@@ -1,64 +1,87 @@
-# 项目名称
+# Agent Handoff
 
-> 待初始化。仅填写当前项目已核实的信息。
-> 模板初始化与人工接力使用方法见 [初始化说明](docs/INITIALIZATION.md)。
+用于 Codex、Claude Code 等编程工具之间的任务接力的通用项目模板。
+一个工具额度耗尽或中途停止后，由用户切换到另一个工具，依据项目文件继续工作。
 
-## 项目简介
+共享规则、长期知识、任务目标、检查点与验证记录；人工切换工具，不自动调度 Agent。
+模板不预设业务、技术栈或部署平台，不携带具体项目的历史。
 
-<!-- 项目解决的问题、目标用户和主要能力。需求主记录见 docs/PROJECT-SPEC.md。 -->
+## 一键初始化
 
-待填写。
+进入你的项目文件夹，运行：
 
-## 技术栈
+```bash
+curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh | bash
+```
 
-<!-- 简要列出已采用的技术，不预设框架、数据库或部署平台。 -->
+需要 Bash、curl、tar 和常见系统工具，初始化不依赖 Git 或 Node.js。
+始终初始化当前目录，已有同名文件会导致停止；已有 README.md 保留，不影响安装其他文件。
+没有 README.md 时生成空白项目说明，不把本页复制进项目。
 
-待填写。
+也可以先下载脚本，预览后初始化：
 
-## 快速开始
+```bash
+curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh -o /tmp/agent-handoff-bootstrap.sh
+bash /tmp/agent-handoff-bootstrap.sh --dry-run
+bash /tmp/agent-handoff-bootstrap.sh
+```
 
-- 环境要求：待填写。
-- 安装命令：待填写。
-- 必要配置：待填写变量名及安全获取方式，不写凭据。
-- 启动命令：待填写。
-- 验证命令：待填写。
-- 详细开发流程：[DEVELOPMENT.md](docs/DEVELOPMENT.md)。
+初始化后填写项目需求和说明，未知信息保留待填写，没有实际任务时保持 draft。
 
-## 多 Agent 接入
+## 通过 Agent 接入
 
-本仓库不绑定单一工具，规则入口只有一个：
+在目标项目中打开编程工具，按实际情况复制下面对应的提示词。
+新项目可使用一键脚本或 Agent 初始化；已有接力能力的项目优先让 Agent 核对后合并。
 
-| 客户端 | 入口 |
-| :--- | :--- |
-| Codex / OpenCode / DeepSeek Harness | 直接读取 [AGENTS.md](AGENTS.md) |
-| Claude Code | [CLAUDE.md](CLAUDE.md) 指向同一入口，可整体替换为指向 AGENTS.md 的符号链接 |
-| Antigravity / Gemini | `.gemini/antigravity/skills` 指向根目录 `skills/`，入口文件按平台核实 |
+### 新项目：首次初始化
 
-- 规则正文：[AGENT-RULES.md](docs/AGENT-RULES.md)（按章读取，不全文注入）。
-- 共享工作流：[skills/](skills/)（Codex 等不支持项目级技能的客户端按入口步骤按需读取）。
-- 接入细节、客户端映射与避坑：[MULTI-AGENT.md](docs/MULTI-AGENT.md)。
-- 新建项目骨架：`node scripts/init.mjs --target <目录>`。
+```text
+请使用 https://github.com/timorpic/agent-handoff，为当前新项目完成首次初始化。
 
-## 文档入口
+先确认当前项目根目录和已有文件，读取适用的上层及本地规则。
+将模板下载到临时目录，核对后初始化当前项目。
 
-- [模板文件树与初始化说明](docs/INITIALIZATION.md#模板文件树)
+要求：
+1. 只引入通用规则、工具入口、共享工作流和空白接力文件，不导入模板仓库的身份、维护历史、测试结果或其他项目的信息。
+2. 保留已有文件和未提交修改；遇到同名文件先核对，不直接覆盖。项目已有 README.md 时保留，没有时生成空白项目说明。
+3. 项目标识根据当前项目核实并统一填写；业务目标、技术栈、架构、部署等未知信息保留待填写，不自行编造。
+4. 没有明确活动任务时，CONTEXT 和 CHECKPOINT 保持 draft，不虚构前任、进度、授权或验证结果。
+5. 采用统一规则入口，客户端入口只引用；目标是人工切换编程工具后继续同一任务，不增加自动调度或跨工具并发。
+6. 核对文件引用、技能链接、忽略规则和实际客户端入口，执行适用检查。
+7. 不提交、不推送、不发布。完成后说明生成内容、验证结果和仍需填写的信息。
 
-- [需求与验收](docs/PROJECT-SPEC.md)
-- [系统架构](docs/ARCHITECTURE.md)
-- [开发流程](docs/DEVELOPMENT.md)
-- [部署与回滚](docs/DEPLOYMENT.md)
-- [视觉与交互规范](DESIGN.md)（无 UI 时不适用）
-- [任务计划](TODO.md)
-- [版本记录](CHANGELOG.md)
-- [规则入口](AGENTS.md) / [详细工作规则](docs/AGENT-RULES.md)
-- [多 Agent 接入](docs/MULTI-AGENT.md)
-- [共享技能库](skills/README.md)
-- [长期知识](MEMORY.md)
-- [人工接力协议](HANDOFF.md)
-- [人工使用提示词](PROMPTS.md)
-- [工具适配入口](adapters/ENTRY.md)（按需复制）
-- [当前任务](.handoff/CONTEXT.md) / [执行现场](.handoff/CHECKPOINT.md)（如存在；新克隆中缺失属预期）
+在上述范围内直接完成，只有影响项目事实或已有内容的关键歧义才向我确认。
+```
 
-## 许可证
+### 现有项目：补齐已有接力能力
 
-待项目确认后填写，不默认指定。
+```text
+请参考 https://github.com/timorpic/agent-handoff，检查并补齐当前项目已有的任务接力能力。
+
+先确认当前项目根目录，读取适用规则、长期记忆、任务上下文、检查点和相关文档，检查 Git 修改状态。
+将参考模板下载到临时目录，先对照现有实现，再做最小必要改动，不整套覆盖或重新初始化。
+
+要求：
+1. 以当前项目已确认的需求和有效记录为依据；参考模板只作为改进来源，不自动替换项目约定。
+2. 优先复用现有规则入口、记忆、检查点、脚本及工作流。已有等效能力时保留，不创建重复文件或平行事实来源。
+3. 保留 README、业务代码、项目身份、历史决策、活动任务、验证证据及用户未提交修改。不把已有记录重置为空白或 draft。
+4. 不导入模板仓库的身份、维护历史、测试结果或其他项目的信息。旧验证只有在证据与当前现场仍适用时才能保留为有效结论。
+5. 重点检查：新工具能否识别同一任务、核实已有修改、判断验证状态、找到下一步，以及在突然中断后恢复；接管前核实旧工具已停止写入。
+6. 统一规则入口和记录职责；客户端入口只引用。合并 .gitignore 时保留业务规则，避免忽略正式文档、共享技能及需跟踪的归档。
+7. 不增加自动调度或跨工具并发，不因接入模板而扩大提交、发布或其他外部操作授权。
+8. 先简要说明现有能力、缺口及拟修改范围，再在已授权范围内完成补齐，执行适用验证并更新相关记录。
+9. 不提交、不推送、不发布。完成后列出实际改动、验证结果、未验证项和剩余问题。
+
+兼容性或记录归属存在关键冲突时向我确认；其余按最小改动原则直接完成。
+```
+
+## 使用与说明
+
+- [初始化说明与文件职责](docs/INITIALIZATION.md)
+- [人工接力与中断恢复](HANDOFF.md)
+- [客户端接入](docs/MULTI-AGENT.md)
+- [可选接力助手](docs/HANDOFF-HELPER.md)（使用助手需要 Node.js >= 18）
+- [规则入口](AGENTS.md)与[详细规则](docs/AGENT-RULES.md)
+- [共享工作流](skills/README.md)
+
+本 README 只介绍模板自身；项目 README 的空白样板是 [README.project.md](README.project.md)。

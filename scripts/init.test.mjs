@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/init.test.mjs —— scripts/init.mjs 的端到端自测（可选，零依赖）
 //
-// 用途：把任务要求的 6 项自测固化成可重跑的用例，全部在临时目录里进行，结束后清理。
+// 用途：生成器与交接状态检查的回归测试，全部在临时目录里进行，结束后清理。
 // 用法：node scripts/init.test.mjs        （在仓库任意位置执行均可；需要 node >= 18 与 git）
 // 退出码：0 全部通过；1 有失败用例；2 环境不满足（例如找不到 git）。
 //
@@ -255,6 +255,55 @@ async function testExtraSafety() {
   return undefined;
 }
 
+async function testClaimStates() {
+  const failuresBefore = failures;
+  const tmp = await makeTempDir();
+  const target = path.join(tmp, 'proj');
+  const generated = run(['--target', target, '--project-id', 'claim-states']);
+  if (generated.code !== 0) return fail('认领状态) 生成失败');
+  if (runShell('git init -q', target).code !== 0) return fail('认领状态) git init 失败');
+  const checkpoint = path.join(target, '.handoff', 'CHECKPOINT.md');
+  const original = await readFile(checkpoint, 'utf8');
+  async function checkState(field, row, expectedCode, label, retainHint = true) {
+    const fieldValue = retainHint
+      ? original.match(/^- handoff_claim: (.*)$/m)[1].replace(/^not_applicable/, field)
+      : field;
+    const text = original
+      .replace(/^- status: draft$/m, '- status: active')
+      .replace(/^- handoff_claim: .*$/m, '- handoff_claim: ' + fieldValue)
+      .replace(/^\| 认领状态 \|.*$/m, '| 认领状态 | ' + row + ' |');
+    await writeFile(checkpoint, text);
+    const check = runShell('sh scripts/check-docs.sh', target);
+    if (check.code !== expectedCode) {
+      fail('认领状态) ' + label, 'exit=' + check.code + '\n' + check.stdout + check.stderr);
+    }
+  }
+  for (const value of ['open', 'claimed', 'declined', 'expired', 'not_applicable']) {
+    await checkState(value, value, 0, value);
+  }
+  await checkState('claimed', 'claimed', 0, '无枚举注释的实际状态', false);
+  await checkState('claimed', 'open', 1, '字段与表格冲突');
+  await checkState('unknown', 'unknown', 1, '未知状态');
+  await checkState('claimed', '', 1, '缺失表格状态');
+  await checkState('claimed', 'open / claimed / declined / expired / not_applicable', 1, '活动任务未填写表格状态');
+  if (failures === failuresBefore) {
+    pass('认领状态) 已验证合法单值、冲突、未知值与未填写状态', '模板枚举注释不再替代实际状态');
+  }
+}
+
+async function testProjectReadme() {
+  const target = await makeTempDir();
+  const content = '# 已有项目\n\n保留项目自己的内容。\n';
+  await writeFile(path.join(target, 'README.md'), content);
+  for (const extra of [[], ['--force']]) {
+    const result = run(['--target', target, ...extra]);
+    if (result.code !== 0 || await readFile(path.join(target, 'README.md'), 'utf8') !== content) {
+      return fail('项目 README) 保留已有内容', result.stdout + result.stderr);
+    }
+  }
+  return pass('项目 README) 默认初始化及 --force 均保留项目已有说明');
+}
+
 async function main() {
   const probe = spawnSync('git', ['--version'], { encoding: 'utf8' });
   if (probe.status !== 0) {
@@ -275,6 +324,8 @@ async function main() {
   await test5NoSymlink();
   await test6Modules();
   await testExtraSafety();
+  await testClaimStates();
+  await testProjectReadme();
 
   for (const dir of tempDirs) {
     await rm(dir, { recursive: true, force: true });

@@ -76,7 +76,7 @@ const ROOT_FILES = [
 const WALK_DIRS = ['adapters', 'docs', 'skills'];
 
 // 其它固定复制项（scripts/init.mjs 一并复制：目标项目里要能执行 --module 追加）
-const EXTRA_FILES = ['scripts/check-docs.sh', 'scripts/init.mjs', '.claude/settings.json'];
+const EXTRA_FILES = ['scripts/check-docs.sh', 'scripts/init.mjs', 'scripts/handoff.mjs', '.claude/settings.json'];
 
 // 现场层：从空白模板复制后仅替换 project_id，status 保持 draft
 const HANDOFF_TEMPLATES = ['.handoff/CONTEXT.md', '.handoff/CHECKPOINT.md'];
@@ -119,7 +119,7 @@ const HELP_TEXT = [
   '行为：',
   '  1. 复制协议层与项目层文件（AGENTS.md、CLAUDE.md、README.md、MEMORY.md、HANDOFF.md、',
   '     PROMPTS.md、DESIGN.md、CHANGELOG.md、TODO.md、.gitignore、adapters/**、docs/**、',
-  '     skills/**、scripts/check-docs.sh、scripts/init.mjs、.claude/settings.json）。',
+  '     skills/**、scripts/check-docs.sh、scripts/init.mjs、scripts/handoff.mjs、.claude/settings.json）。',
   '  2. 不复制 .git/、.handoff 的已有内容、docs 下的模板专属初始化说明。',
   '  3. 对 AGENTS.md、README.md 去掉只属于模板仓库的引用（目标项目里不该出现该文件名）。',
   '  4. 生成空白 draft 的 .handoff/CONTEXT.md 与 .handoff/CHECKPOINT.md。',
@@ -235,7 +235,7 @@ function transformTemplateRefs(relPath, text) {
   }
 
   if (relPath === 'README.md') {
-    const replacement = '> 多 Agent 接入见 [多 Agent 接入](docs/MULTI-AGENT.md)，'
+    const replacement = '> 跨工具接力与客户端接入见 [客户端接入](docs/MULTI-AGENT.md)，'
       + '人工接力见 [人工接力协议](HANDOFF.md)。';
     const output = [];
     for (let index = 0; index < inputLines.length; index += 1) {
@@ -441,7 +441,9 @@ async function walkFiles(dirAbs, prefix, depth, notes) {
 
 // 把单个复制项加入计划；源文件缺失时记入「源文件暂缺」，不中断
 async function addCopyEntry(rel, transform, ctx) {
-  const sourceAbs = path.join(SOURCE_ROOT, rel);
+  const readmeTemplate = path.join(SOURCE_ROOT, 'README.project.md');
+  const sourceAbs = rel === 'README.md' && await pathExists(readmeTemplate)
+    ? readmeTemplate : path.join(SOURCE_ROOT, rel);
   const info = await lstatSafe(sourceAbs);
   if (!info || !info.isFile()) {
     ctx.missingSources.push({ rel, reason: '源文件暂缺（可能正在并行编辑）' });
@@ -679,6 +681,11 @@ async function finalizeEntries(ctx, options) {
     const info = await lstatSafe(destAbs);
     if (!info) {
       entries.push(entry);
+      continue;
+    }
+
+    if (entry.rel === 'README.md' && info.isFile() && !info.isSymbolicLink()) {
+      entries.push({ ...entry, kind: 'skip', reason: '保留项目已有 README.md' });
       continue;
     }
 
