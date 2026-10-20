@@ -224,6 +224,10 @@
 
 - 稳定 project_id：待填写（首次取目标仓库名，无仓库取目标工作目录名；不使用模板目录名；确定后保持稳定）。
 - 协议版本：c76493b（模板仓库 commit SHA；安装日期 2026-10-18；升级协议层后同步更新）。
+- 规则入口（SSOT）：AGENTS.md；客户端入口（CLAUDE.md、adapters/ENTRY.md）只引用。
+- 详细规则：docs/AGENT-RULES.md（按章读取，第 19 节为多客户端协作边界）。
+- 共享技能库：根目录 skills/；客户端私有目录用相对链接指向它，不复制正文。
+- 多 Agent 接入与客户端映射：docs/MULTI-AGENT.md；核实状态以该文件为准。
 - 接力入口：.handoff/CONTEXT.md。
 - 检查点：.handoff/CHECKPOINT.md。
 - 接力协议：HANDOFF.md。

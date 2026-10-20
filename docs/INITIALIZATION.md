@@ -4,7 +4,7 @@
 
 ~~~text
 项目根目录/
-├── AGENTS.md                  # 精简启动入口与必守边界          [项目层·跟踪]
+├── AGENTS.md                  # 规则入口 SSOT（精简）＋章节路由   [项目层·跟踪]
 ├── CLAUDE.md                  # Claude Code 工具入口             [入口层·跟踪,可适配]
 ├── README.md                  # 项目简介与快速开始               [项目层·跟踪]
 ├── MEMORY.md                  # 长期知识与决策索引               [项目层·跟踪]
@@ -13,24 +13,44 @@
 ├── TODO.md                    # 任务计划与依赖                   [项目层·跟踪]
 ├── HANDOFF.md                 # P0+P1 人工接力协议               [协议层·跟踪,禁改]
 ├── PROMPTS.md                 # 初始化、交接与恢复提示           [协议层·跟踪,禁改]
-├── .gitignore                 # 现场层忽略规则；复制到目标项目   [项目层·跟踪]
+├── .gitignore                 # 现场层与平台缓存忽略规则         [项目层·跟踪]
 ├── .handoff/
 │   ├── CONTEXT.md             # 活动任务目标与验收入口           [现场层·不跟踪]
 │   ├── CHECKPOINT.md          # 执行现场、验证与下一步           [现场层·不跟踪]
 │   └── archive/               # 归档任务上下文与检查点           [项目层·跟踪]
+├── skills/                    # 跨客户端共享技能库（标准位置）   [项目层·跟踪]
+│   ├── README.md              # 技能规范与新增检查清单
+│   ├── code-review/SKILL.md   # 通用代码审查工作流
+│   ├── refactor/SKILL.md      # 重构保障工作流
+│   └── release/SKILL.md       # 发版与 CHANGELOG 联动
+├── .claude/                   # Claude Code 私有配置目录         [项目层·跟踪]
+│   ├── settings.json          # 权限与允许的命令（不含凭据）
+│   └── skills -> ../skills    # 相对软链，共享根 skills/（Git 模式 120000）
+├── .gemini/
+│   └── antigravity/
+│       └── skills -> ../../skills  # 相对 .gemini/antigravity/，层级必须是两级
 ├── adapters/
-│   └── ENTRY.md               # 无原生 AGENTS.md 机制时按需复制   [入口层·跟踪,可适配]
+│   ├── ENTRY.md               # 无原生 AGENTS.md 机制时按需复制   [入口层·跟踪,可适配]
+│   └── scoped/MODULE-AGENTS.md  # 局部作用域 AGENTS.md 模板
+├── scripts/
+│   ├── check-docs.sh          # 只读一致性自检                   [项目层·跟踪]
+│   ├── init.mjs               # 零依赖骨架生成器                 [项目层·跟踪]
+│   └── init.test.mjs          # 生成器回归自测（仅模板仓库需要） [项目层·跟踪]
 └── docs/
     ├── INITIALIZATION.md      # 本文件；不复制到目标项目         [仅模板仓库]
+    ├── MULTI-AGENT.md         # 客户端映射、作用域与避坑         [项目层·跟踪]
     ├── AGENT-RULES.md         # 开发、记忆、Release 与接力规则   [协议层·跟踪,禁改]
     ├── PROJECT-SPEC.md        # 产品目标、范围与验收             [项目层·跟踪]
     ├── ARCHITECTURE.md        # 系统架构与模块边界               [项目层·跟踪]
     ├── DEVELOPMENT.md         # 环境、开发与验证流程＋项目专属规则 [项目层·跟踪]
-    └── DEPLOYMENT.md          # 构建、部署与回滚                 [项目层·跟踪]
+    ├── DEPLOYMENT.md          # 构建、部署与回滚                 [项目层·跟踪]
+    ├── decisions/             # ADR：ADR-001-xxx.md（按需建立）
+    └── runbooks/              # 部署、运维、排障手册（按需建立）
 ~~~
 
-以上为模板实际包含的文件。组件指南、页面结构、组件注册和 ADR 文档按需建立，
-见下文“按需增加的文档”；不预先加入空目录或虚构项目内容。
+以上为模板实际包含的文件。docs/decisions/ 与 docs/runbooks/ 按需建立，
+不预先加入空目录或虚构项目内容（见下文“按需增加的文档”）。
+`src/` 下的模块级 AGENTS.md 只在确有模块差异时用 `--module` 生成，不预建。
 跟踪策略见下文“模板文件的 Git 跟踪策略”。
 
 ## 文件职责
@@ -41,6 +61,11 @@
 | AGENTS.md | 精简启动入口、必守边界及章节读取路由 |
 | docs/AGENT-RULES.md | 开发、质量、安全、图标、Release、长期知识与协作详细规则 |
 | CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则（允许按项目适配） |
+| docs/MULTI-AGENT.md | 客户端入口映射、分层作用域、技能共享与跨平台避坑 |
+| skills/<name>/SKILL.md | 可复用工作流（前置元数据＋步骤＋验证要求），按需读取 |
+| scripts/init.mjs | 零依赖骨架生成器：复制模板并建立链接或回退形态 |
+| scripts/init.test.mjs | 生成器的端到端回归自测：`node scripts/init.test.mjs`，退出码 0 表示全部通过 |
+| scripts/check-docs.sh | 只读一致性自检：死链、章节引用、技能元数据、链接解析、跟踪状态 |
 | MEMORY.md | 当前有效的长期知识及决策索引 |
 | DESIGN.md | 有 UI 的项目采用的视觉与交互规范 |
 | CHANGELOG.md | 面向使用者的版本变更和升级说明 |
@@ -69,6 +94,25 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 是工具入�
 
 ## 首次使用
 
+推荐用脚本生成，再按项目填写；手工复制时按同样顺序执行。
+
+一键生成：
+
+~~~bash
+node scripts/init.mjs --target ../my_project --project-id my_project --dry-run   # 先看计划
+node scripts/init.mjs --target ../my_project --project-id my_project             # 实际生成
+node scripts/init.mjs --target ../my_project --module src/api --module src/persistence
+~~~
+
+脚本行为：复制项目层与协议层文件、建立 `.claude/skills` 与 `.gemini/antigravity/skills`
+的相对软链、生成空白 draft 的 `.handoff/CONTEXT.md` 与 `.handoff/CHECKPOINT.md`、
+清理指向 `docs/INITIALIZATION.md` 的模板专属引用；默认不覆盖已存在文件，
+冲突时列出清单并以退出码 1 结束，`--force` 才覆盖。
+不支持符号链接的环境加 `--no-symlink`，回退为目录加 README.md 指针。
+生成器的回归自测：`node scripts/init.test.mjs`（模板仓库内执行，退出码 0 表示通过）。
+
+手工步骤：
+
 1. 将模板文件及 .handoff 点目录复制到目标项目；已有同名文件先核对并合并，不能直接覆盖。
    docs/INITIALIZATION.md 不复制；先按“模板文件的 Git 跟踪策略”配置并验证忽略规则。
    CLAUDE.md 按目标项目的工具路由合并，adapters/ENTRY.md 仅在需要时复制。
@@ -80,12 +124,19 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 是工具入�
 6. 使用工具原生支持的规则入口；Claude Code 使用 CLAUDE.md，支持 AGENTS.md 的工具使用根目录 AGENTS.md。
    入口未加载或工具无对应机制时，可显式使用 adapters/ENTRY.md。
    在实际工具中核实文件已读取，入口未加载时使用 PROMPTS 中的显式提示。
+   多客户端细节见 docs/MULTI-AGENT.md；客户端是否加载某文件属外部事实，须实测确认。
 7. 在 MEMORY.md 与 AGENTS.md 记录协议版本（模板仓库 commit SHA）。
 8. 清理只属于模板仓库的引用：`docs/INITIALIZATION.md` 不复制，
    因此目标项目需要处理指向它的引用（AGENTS.md 第 3 行后的说明、README 顶部与文档入口）：
    删除、改为项目自有说明，或标注“仅模板仓库适用”。
    `.gitignore` 顶部注释可保留，它只是规则来源说明，不影响运行。
    完成后按下方“新克隆自检”确认没有死链。
+9. 核对共享技能：`skills/` 与根目录同级，`.claude/skills`、`.gemini/antigravity/skills`
+   应解析到它；`skills/*/SKILL.md` 的 frontmatter `name` 必须等于目录名。
+10. 只在确有模块级差异时创建局部作用域：`--module <相对路径>` 或手工复制
+    adapters/scoped/MODULE-AGENTS.md，不预建空目录。
+11. 执行 `sh scripts/check-docs.sh`，退出码应为 0；在目标项目中它会自动识别为
+   「非模板布局」，不再要求存在模板专属文件。
 
 ## 模板文件的 Git 跟踪策略
 
@@ -117,6 +168,29 @@ CLAUDE.md、adapters/ENTRY.md
 
 adapters/ENTRY.md 是按需文件：只有目标工具既无原生入口又不支持 AGENTS.md 时才需要复制，
 其余项目不必创建。文件树中列出它是为了说明模板提供的形态，不代表每个项目都要装。
+adapters/scoped/MODULE-AGENTS.md 只是局部作用域模板，供 `--module` 或手工复制使用。
+
+### 共享技能与客户端配置：跟踪
+
+以下路径纳入跟踪，否则新克隆后技能缺失、客户端权限配置丢失：
+
+- `skills/**`：技能正文，跨客户端共享的唯一位置。
+- `.claude/settings.json`：Claude Code 的权限与允许命令；不含凭据。
+- `.claude/skills`、`.gemini/antigravity/skills`：**相对符号链接本身**，须以 `git add` 纳入
+  （Git 模式 120000）。不跟踪链接会导致新克隆后客户端找不到技能目录。
+- 若某平台不支持符号链接而采用“目录 + README.md 指针”的回退形态，该目录与指针文件同样跟踪。
+
+判据：技能正文只存一份在 `skills/`；客户端目录只放链接或指针，**不放技能副本**。
+把 SKILL.md 复制进 `.claude/skills/` 会让其他客户端无法自然发现，并产生多套需要同步的副本。
+
+### 平台专属临时缓存：不跟踪
+
+客户端会话缓存与临时草稿按锚定路径忽略，不整体忽略配置目录：
+
+~~~gitignore
+/.claude/memory/
+/.gemini/antigravity/scratch/
+~~~
 
 docs/INITIALIZATION.md（本文件）不复制到目标项目：它说明的是如何初始化，初始化完成后不再适用。
 
@@ -140,7 +214,8 @@ previous 备份统一命名为 `.handoff/CHECKPOINT.previous.md`（见 HANDOFF.m
 按各项目实际情况纳入版本控制，缺失的不创建空文件：
 
 README.md、AGENTS.md、MEMORY.md、TODO.md、DESIGN.md、CHANGELOG.md、
-docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYMENT.md。
+docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYMENT.md、
+docs/MULTI-AGENT.md、scripts/check-docs.sh、scripts/init.mjs。
 
 `MEMORY.md` 记录 DEC / LES 长期条目，不跟踪会导致新克隆丢失全部积累，必须纳入。
 `.handoff/archive/**` 是冻结的历史证据，同样跟踪。
@@ -160,18 +235,24 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 
 ### 执行要求
 
-- 只忽略现场层；用锚定路径，不写 `.handoff/` 或 `docs/` 整体忽略，否则会连带吞掉归档和项目文档。
+- 只忽略现场层与平台缓存；用锚定路径，不写 `.handoff/`、`.claude/`、`docs/` 或 `skills/`
+  整体忽略，否则会连带吞掉归档、配置、项目文档与技能。
 - 工具入口若为符号链接（如 CLAUDE.md → AGENTS.md），须用 `git add` 纳入符号链接本身
-  （模式 120000）；否则新克隆后入口缺失。
+  （模式 120000）；否则新克隆后入口缺失。技能目录链接同理。
 - 取消跟踪已跟踪文件时用 `git rm --cached -- <路径>`；不加 `-f`，不删除本地文件。
 - 逐项核对：本地文件仍存在且内容未变、`git ls-files` 中无该路径、`git check-ignore -v` 忽略生效。
 - 非 Git 项目先备好根目录 `.gitignore`，执行 `git init` 后补验。
-- **新克隆自检**：克隆到临时目录，确认工具入口、docs/AGENT-RULES.md 与 HANDOFF.md 均存在，
-  并逐条检查 AGENTS.md 的项目层与协议层链接可解析；入口层、README 的链接也一并核对。
+- **新克隆自检**：克隆到临时目录，确认工具入口、docs/AGENT-RULES.md、HANDOFF.md、
+  skills/ 与 scripts/check-docs.sh 均存在，并逐条检查 AGENTS.md 的项目层与协议层链接可解析；
+  入口层、README、docs/MULTI-AGENT.md 的链接也一并核对。
   现场层（`.handoff/CONTEXT.md`、`.handoff/CHECKPOINT.md`）在**目标项目**的克隆中**应当缺失**，属预期：
   入口对它们的引用必须带「如存在」或等效说明，缺失时按当前现场重建，不虚构前任记录。
   `.handoff/archive/` 同样可能不存在；入口不得要求其必须存在。
   模板仓库自身例外：克隆中两者应存在且为空白 draft，见上文「模板仓库自身的例外」。
+- **技能链接自检**：确认 `.claude/skills` 与 `.gemini/antigravity/skills` 在克隆中仍是符号链接
+  （`test -L`）且 `readlink` 分别为 `../skills` 与 `../../skills`；若被检出为普通文本文件，
+  说明该环境 `core.symlinks=false`，需按内容重建链接或改用目录加指针的回退形态。
+  逐个核对 `skills/*/SKILL.md` 的 frontmatter `name` 与目录名一致。
 
 ### 交接协议的可核对性
 
@@ -198,7 +279,8 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 - 在项目 MEMORY.md 记录：协议版本 SHA 与安装日期。
 - AGENTS.md 顶部写同一 SHA。
 - 升级＝整体覆盖协议层 3 个文件＋更新 SHA，随后核对章节引用仍可解析；推荐直接执行
-  `sh scripts/check-docs.sh`（模板仓库提供，只读，覆盖死链、章节引用、认领状态枚举和跟踪状态）。
+  `sh scripts/check-docs.sh`（只读，覆盖死链、章节引用、认领状态枚举、技能前置元数据、
+  技能链接解析、settings.json 合法性与忽略规则）。
   手工等价命令：
   `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md CLAUDE.md HANDOFF.md PROMPTS.md MEMORY.md .handoff/*.md docs/*.md | sort -u`
   （MEMORY 与 .handoff 模板也含章节引用，必须纳入；目标项目缺少现场层文件时按实际存在的文件执行。）
@@ -215,15 +297,17 @@ docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYM
 TODO 维护计划，CHECKPOINT 维护实际现场；完成状态必须有验收证据。
 MEMORY 只摘录长期约束并链接主记录，不复制完整架构、设计或需求。
 CONTEXT 引用需求条款和当前任务，不复制长期知识。
+技能正文只存 `skills/` 一份；入口、局部 AGENTS.md 与客户端目录都不复制。
 
 ## 阅读与维护路径
 
-1. 开始或接手任务：先读适用 AGENTS.md，按入口读取 docs/AGENT-RULES.md 对应章节，再核对 MEMORY 的现行事实、CONTEXT 和最新 CHECKPOINT。
+1. 开始或接手任务：先读适用 AGENTS.md（含当前目录的局部入口），按入口读取 docs/AGENT-RULES.md 对应章节，再核对 MEMORY 的现行事实、CONTEXT 和最新 CHECKPOINT。
 2. 依据 CONTEXT 的精确引用读取相关需求、架构、开发或部署文档，避免遍历全部文档。
 3. 只有需要核对决定理由、旧问题或恢复依据时，读取相关 ADR、经验历史或归档检查点。
-4. 文件树与职责表只做导航；新增、移动、删除文档时同步更新，不记录进度和决定。
-5. MEMORY 通过条目 ID 链接详细依据；历史变多时按 docs/AGENT-RULES.md 第 13.4 节整理，关键约束不能因时间较旧丢失。
-6. 正常结束或交接填写检查点结果摘要，区分已完成、未完成、未验证和阻塞条件。
+4. 需要执行可复用工作流时，读取对应 `skills/<name>/SKILL.md`，不预加载全部技能。
+5. 文件树与职责表只做导航；新增、移动、删除文档时同步更新，不记录进度和决定。
+6. MEMORY 通过条目 ID 链接详细依据；历史变多时按 docs/AGENT-RULES.md 第 13.4 节整理，关键约束不能因时间较旧丢失。
+7. 正常结束或交接填写检查点结果摘要，区分已完成、未完成、未验证和阻塞条件。
 
 本套模板是可由不同工具执行的文件协议。入口读取、记忆整理和结果记录须由当前工具实际执行；
 文件存在本身不能保证自动注入上下文、强制互斥或结果校验。
@@ -231,14 +315,27 @@ CONTEXT 引用需求条款和当前任务，不复制长期知识。
 
 ## 按需增加的文档
 
+- docs/decisions/：ADR，重要决策需要记录详细背景、备选方案和后果时建立，命名 ADR-001-xxx.md。
+- docs/runbooks/：部署、运维与排障手册，确有操作流程时建立。
 - docs/COMPONENT-GUIDELINES.md：有复用组件体系时记录组件、样式、依赖与无障碍要求。
 - docs/PAGE-STRUCTURE.md：页面较多且路由/页面职责需要专门说明时建立。
 - docs/REGISTRY.md：确实存在组件注册、构建和分发机制时建立。
-- docs/adr/：重要决策需要记录详细背景、备选方案和后果时建立。
 - docs/knowledge/：经验说明或历史过长时按需建立，MEMORY 保留稳定条目 ID 和入口。
+- tools/scripts/、tools/prompts/：项目自有维护脚本与长提示词模板，确有需要时建立。
+- 模块级 AGENTS.md：模块确有专属边界、数据访问或验证差异时建立，见下文“分层作用域与共享技能”。
 
 这些文件不要求每个项目创建；通用详细要求维护在 docs/AGENT-RULES.md，项目文档只写实际适用的约定。
 部署平台、技术栈、数据库、版本基准年和发布渠道由当前项目确定。
+
+## 分层作用域与共享技能
+
+- 规则入口唯一：根 AGENTS.md 是 SSOT；CLAUDE.md、adapters/ENTRY.md 与局部入口都只引用，不复制正文。
+- 局部 AGENTS.md 放在模块目录，只写该模块实际存在的差异约束；进入目录前读取，就近只补充不覆盖。
+- 局部目录的 CLAUDE.md 应是指向同级 AGENTS.md 的相对链接；不支持软链时用两行指针文件。
+- 共享技能放根 `skills/<name>/SKILL.md`；`.claude/skills` 与 `.gemini/antigravity/skills` 用相对链接指向它。
+  相对深度的错误不会报错，只会静默指向不存在的路径，必须按 `readlink` 核对。
+- 不把技能副本放进任一客户端目录；不假定某客户端必然加载某文件，接入后实测一次。
+- 客户端映射、核实状态与跨平台避坑见 docs/MULTI-AGENT.md；规则边界见 docs/AGENT-RULES.md 第 19 节。
 
 ## 人工接力
 
@@ -248,3 +345,4 @@ CONTEXT 引用需求条款和当前任务，不复制长期知识。
 突然退出按 HANDOFF.md 恢复，不将未知结果写成成功。
 新任务开始前将旧上下文与检查点成对归档。
 不配置自动 Agent 调度、余额探测或自动工具切换。
+多工具并行不改变上述边界：同一工作区仍只有一位写入者，由用户手动切换。

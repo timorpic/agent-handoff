@@ -11,3 +11,9 @@
 # 忽略规则只作用于未跟踪文件，不影响两者的跟踪状态；
 # 目标项目初始化时执行 git rm --cached 后，上述规则即生效。
 # .handoff/archive/ 属冻结历史证据，必须跟踪，不在此忽略。
+
+# 平台专属临时缓存：不进 Git
+# 规则来源：客户端约定（.claude / .gemini）与本仓库 skills/ 共享技能库设计；
+# 只忽略各平台的会话缓存，不忽略技能正文（skills/ 与两个软链必须跟踪）。
+/.claude/memory/
+/.gemini/antigravity/scratch/
