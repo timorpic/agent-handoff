@@ -63,3 +63,23 @@ project_id、task_id、上下文修订、当前分支、HEAD、所有相关未�
 MEMORY、ADR、需求与实际实现，不自动继承其他项目结论。
 结论确认后更新 MEMORY / ADR，记录稳定条目 ID、确认依据、适用范围和替代关系。
 不把临时待办、检查点或聊天全文写入长期知识。
+
+## 多 Agent 接入与共享技能
+
+请按 docs/AGENT-RULES.md 第 19 节接入当前工具，不要为它新建第二套规则。
+先确认使用的入口（CLAUDE.md、AGENTS.md 或平台入口）确实指向 AGENTS.md，
+并实际读取一次，确认内容被加载；未加载时改用 adapters/ENTRY.md 显式提示。
+共享技能位于根目录 skills/，客户端私有目录只放相对链接，不复制 SKILL.md。
+只在确有模块级差异时建局部 AGENTS.md，同级 CLAUDE.md 指向它，不复制正文。
+接入后执行 `sh scripts/check-docs.sh`，核对死链、章节引用、技能前置元数据与链接解析。
+客户端是否自动加载某文件属外部事实，请以实际结果为准，不要假定生效。
+
+## 新建项目骨架
+
+请在目标目录执行 `node scripts/init.mjs --target <目录> --project-id <标识>`，
+先用 `--dry-run` 核对生成计划；需要模块作用域时追加 `--module <相对路径>`。
+生成后核对：入口只引用不复制规则正文、`.claude/skills` 与
+`.gemini/antigravity/skills` 解析到根 skills/、现场层仍为空白 draft。
+不要为初始化虚构任务事实、前任记录或测试结果。
+不支持符号链接的环境使用 `--no-symlink`，回退为目录加 README.md 指针。
+初始化完成后按「首次初始化」填充本项目已核实的信息。

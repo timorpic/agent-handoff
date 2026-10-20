@@ -9,6 +9,8 @@ P0 是统一上下文与人工交接；P1 是检查点、现场核验和异常�
 | 内容 | 主记录 | 其他文件怎么引用 |
 | --- | --- | --- |
 | 开发、验证、安全、图标、Release 规则 | docs/AGENT-RULES.md | AGENTS.md 提供短入口，工具入口只引用 |
+| 客户端接入、共享技能与作用域边界 | docs/AGENT-RULES.md 第 19 节 / docs/MULTI-AGENT.md | 入口只写本项目的实际客户端与链接 |
+| 可复用工作流 | skills/<name>/SKILL.md | 入口写明共享位置与按需读取，不复制技能正文 |
 | 长期事实、决策、稳定 project_id、Release 基准年 | MEMORY.md / 所链接的 ADR | CONTEXT 引用条目 ID |
 | 完整需求及验收条款 | 已有 PRD / Issue；无则 CONTEXT | 有正式文档时只写摘要和定位 |
 | 活动任务、范围、上下文修订、授权依据 | .handoff/CONTEXT.md | CHECKPOINT 绑定 task_id 与 context_revision |
@@ -22,6 +24,7 @@ P0/P1 文件不保存聊天全文、隐藏推理或模型内部状态。恢复�
 ## 2. 统一入口与阅读顺序
 
 1. 适用的上层及当前目录 AGENTS.md，按入口读取 docs/AGENT-RULES.md 适用章节。
+   进入子目录前先读该目录的 AGENTS.md（如存在），局部约束只补充、不替换上层规则。
 2. 根目录 MEMORY.md，取得稳定 project_id。
 3. HANDOFF.md 与 .handoff/CONTEXT.md。
 4. .handoff/CHECKPOINT.md 及其引用的任务、PRD、ADR、验证证据。
@@ -173,6 +176,7 @@ Git 是代码传递渠道；本地文档与检查点不是代码传输渠道。
 
 接手工具按任务主题核对 MEMORY 与 ADR 中的相关决策与经验，对照实际实现确认；
 实际恢复位置、代码改动和验证结果仍从现场与检查点确认。
+客户端自带的会话记忆或检索结果只作线索，不与本仓库记录并列（见详细规则第 19.5 节）。
 外部工具或服务不可用时，本地流程继续；新项目不得导入其他项目的历史。
 交接前只检查本次有无应沉淀的长期事实；长期事实未发生变化时，不改动 MEMORY。
 
