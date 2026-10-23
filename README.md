@@ -169,5 +169,10 @@ node scripts/handoff.mjs save --agent claude-session-1 --input result.json --han
 - [可选接力助手](docs/HANDOFF-HELPER.md)（使用助手需要 Node.js >= 18）
 - [规则入口](AGENTS.md)与[详细规则](docs/AGENT-RULES.md)
 - [共享工作流](skills/README.md)
+- [统一 Git 标准](docs/AGENT-RULES.md#9-git)与[项目 CI 和仓库设置](docs/DEVELOPMENT.md#github-actions-与仓库设置)
+
+新项目默认采用短期任务分支、规范化 Commit/PR 标题、PR 审查与 Squash merge。
+初始化只分发 PR 模板，不提供或生成目标项目 CI；目标项目自行维护 CI 并核实远程主分支保护。
+模板自身的检查仅由本仓库 GitHub Actions 执行，不分发到目标项目。
 
 本 README 只介绍模板自身；项目 README 的空白样板是 [README.project.md](README.project.md)。

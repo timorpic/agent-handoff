@@ -7,11 +7,14 @@ trap 'rm -rf -- "$temporary"' EXIT
 mkdir -p "$temporary/archive/template" "$temporary/bin" "$temporary/project with spaces" "$temporary/empty" "$temporary/scratch"
 for rel in AGENTS.md CLAUDE.md README.md README.project.md MEMORY.md HANDOFF.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
   .handoff/CONTEXT.md .handoff/CHECKPOINT.md .claude/settings.json \
-  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs; do
+  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs .github/PULL_REQUEST_TEMPLATE.md; do
   mkdir -p "$temporary/archive/template/$(dirname "$rel")"
   cp "$root/$rel" "$temporary/archive/template/$rel"
 done
 for dir in docs adapters skills; do cp -R "$root/$dir" "$temporary/archive/template/$dir"; done
+# 下载包包含模板自身 CI，但初始化不得分发它。
+mkdir -p "$temporary/archive/template/.github/workflows"
+cp "$root/.github/workflows/template-ci.yml" "$temporary/archive/template/.github/workflows/template-ci.yml"
 tar -czf "$temporary/fixture.tar.gz" -C "$temporary/archive" template
 cat > "$temporary/bin/curl" <<'MOCK'
 #!/bin/bash
@@ -49,6 +52,9 @@ grep -q '/feature/example$' "$TEST_URL_LOG"
 grep -q '^- project_id: my-project$' "$temporary/project with spaces/.handoff/CONTEXT.md"
 grep -q '^- 稳定 project_id：my-project$' "$temporary/project with spaces/MEMORY.md"
 cmp "$root/README.project.md" "$temporary/project with spaces/README.md"
+cmp "$root/.github/PULL_REQUEST_TEMPLATE.md" "$temporary/project with spaces/.github/PULL_REQUEST_TEMPLATE.md"
+[[ ! -e "$temporary/project with spaces/.github/workflows" ]]
+[[ ! -e "$temporary/project with spaces/scripts/ci-checks.sh" ]]
 grep -q '^- status: draft$' "$temporary/project with spaces/.handoff/CHECKPOINT.md"
 [[ -L "$temporary/project with spaces/.claude/skills" ]]
 [[ -d "$temporary/project with spaces/.gemini/antigravity/skills" ]]
@@ -76,6 +82,20 @@ expect_status 0 run --no-symlink
 grep -q '^项目自己的 README$' "$temporary/empty/README.md"
 [[ -f "$temporary/empty/.claude/skills/README.md" && ! -L "$temporary/empty/.claude/skills" ]]
 grep -q '^- project_id: 未填' "$temporary/empty/.handoff/CONTEXT.md"
+# 已有 CI 不影响初始化，不能改写项目 CI 或引入模板 CI。
+mkdir -p "$temporary/github-existing/.github/workflows"
+printf '已有项目的 CI\n' > "$temporary/github-existing/.github/workflows/ci.yml"
+run() { (cd "$temporary/github-existing" && bash "$root/scripts/bootstrap.sh" "$@"); }
+expect_status 0 run
+grep -q '^已有项目的 CI$' "$temporary/github-existing/.github/workflows/ci.yml"
+[[ ! -e "$temporary/github-existing/.github/workflows/template-ci.yml" ]]
+# 已有 PR 模板仍按同名冲突保护，不能部分写入。
+mkdir -p "$temporary/github-conflict/.github"
+printf '已有项目的 PR 模板\n' > "$temporary/github-conflict/.github/PULL_REQUEST_TEMPLATE.md"
+run() { (cd "$temporary/github-conflict" && bash "$root/scripts/bootstrap.sh" "$@"); }
+expect_status 1 run
+grep -q '^已有项目的 PR 模板$' "$temporary/github-conflict/.github/PULL_REQUEST_TEMPLATE.md"
+[[ ! -e "$temporary/github-conflict/AGENTS.md" ]]
 # 不完整压缩包：不能留下部分项目文件。
 rm "$temporary/archive/template/HANDOFF.md"
 tar -czf "$temporary/incomplete.tar.gz" -C "$temporary/archive" template

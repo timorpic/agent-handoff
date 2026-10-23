@@ -44,6 +44,9 @@
 ├── HANDOFF.md                 # P0+P1 人工接力协议               [协议层·跟踪,禁改]
 ├── PROMPTS.md                 # 初始化、交接与恢复提示           [协议层·跟踪,禁改]
 ├── .gitignore                 # 现场层与平台缓存忽略规则         [项目层·跟踪]
+├── .github/
+│   ├── PULL_REQUEST_TEMPLATE.md # PR 描述与验证记录               [项目层·跟踪]
+│   └── workflows/template-ci.yml # 模板自身检查；不分发           [仅模板仓库]
 ├── .handoff/
 │   ├── CONTEXT.md             # 活动任务目标与验收入口           [现场层·不跟踪]
 │   ├── CHECKPOINT.md          # 执行现场、验证与下一步           [现场层·不跟踪]
@@ -99,6 +102,8 @@
 | skills/<name>/SKILL.md | 可复用工作流（前置元数据＋步骤＋验证要求），按需读取 |
 | scripts/bootstrap.sh | 下载模板并初始化；`bash scripts/bootstrap.test.sh` 验证下载入口 |
 | scripts/init.mjs | 零依赖骨架生成器：复制模板并建立链接或回退形态 |
+| .github/PULL_REQUEST_TEMPLATE.md | PR 的问题、行为、验证、兼容性与审查记录 |
+| .github/workflows/template-ci.yml | 仅模板仓库运行文档与维护回归；不分发到目标项目 |
 | scripts/init.test.mjs | 生成器的端到端回归自测：`node scripts/init.test.mjs`，退出码 0 表示全部通过 |
 | scripts/handoff.mjs | 本地接力助手：只读现场、精确认领、合规检查点与完整备份 |
 | scripts/handoff.test.mjs | 接力助手集成回归：`node --test scripts/handoff.test.mjs`，仅模板仓库需要 |
@@ -212,6 +217,24 @@ node scripts/init.mjs --target ../my_project --module src/api --module src/persi
     adapters/scoped/MODULE-AGENTS.md，不预建空目录。
 11. 执行 `sh scripts/check-docs.sh`，退出码应为 0；在目标项目中它会自动识别为
    「非模板布局」，不再要求存在模板专属文件。
+12. 按 [开发流程](DEVELOPMENT.md)核对目标项目自行维护的 CI、主分支保护、
+    审批人数及 Squash merge，并在实际 PR 中核实；文件分发不会自动修改远程设置。
+
+### 统一 Git 标准与 CI 边界
+
+所有新项目继承 docs/AGENT-RULES.md 第 9 节；项目差异只写 docs/DEVELOPMENT.md。
+两个初始化入口只按固定清单分发 `.github/PULL_REQUEST_TEMPLATE.md`，
+不复制 `.github/workflows/`，不提供 CI 示例或项目检查入口，也不改写已有项目 CI。
+遇到已有 PR 模板时默认停止，人工核对合并；已有 workflow 不构成初始化冲突。
+
+`.github/workflows/template-ci.yml` 仅服务于本模板仓库，检查 PR 标题、文档一致性，
+并在 GitHub Actions 执行生成器、接力助手和 Shell 初始化回归；它和维护测试均不分发。
+目标项目的 CI 由目标项目自行维护，实际检查名称与保护要求按其工作流核对。
+不能把模板维护回归当作业务项目的验收。本机只运行允许的静态检查，
+测试与构建全部在 GitHub Actions 执行。
+
+本模板维护时保持 MEMORY 与两份分发用现场记录为空白；维护过程可记在被忽略的
+`.handoff/*.tmp.md` 中，不复制到目标项目，不将维护身份或结果写入分发模板。
 
 ## 模板文件的 Git 跟踪策略
 
@@ -290,7 +313,8 @@ previous 备份统一命名为 `.handoff/CHECKPOINT.previous.md`（见 HANDOFF.m
 
 README.md、AGENTS.md、MEMORY.md、TODO.md、DESIGN.md、CHANGELOG.md、
 docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYMENT.md、
-docs/MULTI-AGENT.md、scripts/check-docs.sh、scripts/init.mjs。
+docs/MULTI-AGENT.md、scripts/check-docs.sh、scripts/init.mjs、.github/PULL_REQUEST_TEMPLATE.md。
+模板仓库自身的 `.github/workflows/template-ci.yml` 也须跟踪，但不分发给目标项目。
 
 `MEMORY.md` 记录 DEC / LES 长期条目，不跟踪会导致新克隆丢失全部积累，必须纳入。
 `.handoff/archive/**` 是冻结的历史证据，同样跟踪。

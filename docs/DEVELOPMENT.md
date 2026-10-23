@@ -19,8 +19,35 @@
 没有实际执行的检查不能写为通过；实际结果记录在检查点或正式验收记录。
 
 ## 修改与提交
-遵循 AGENTS.md 指向的详细开发、安全、Git 及测试规则；项目特有分支和提交约定在此填写。
-不将一般修改请求扩展为所有外部操作授权。
+统一标准见 [详细规则](AGENT-RULES.md)第 9 节；本节只记录已确认的项目差异及依据。
+
+- 默认主分支差异：无（默认 main；已有项目需核对）。
+- 分支、Commit 或合并方式差异及确认依据：无。
+- 人工审批人数及团队规模：待确认（单人项目可设为 0，仍须自审和 CI）。
+- 远程保护状态与核实证据：待填写；未核实不表示已生效。
+
+## GitHub Actions 与仓库设置
+
+目标项目自行设计和维护 GitHub Actions 工作流、检查命令、运行时、服务及必需检查名称。
+本模板不提供 CI 示例、不生成目标项目 workflow，也不安装项目检查入口。
+初始化仅分发 PR 模板；已有项目 CI 保持原样，模板仓库自身的 CI 不分发。
+构建与测试全部在 GitHub Actions 执行，本机只做允许的静态检查。
+
+初始化后按项目已有或自行建立的 CI 逐项核实并记录证据：
+
+1. 确认实际默认分支与现有分支保护目标。
+2. 在实际 PR 上核对项目必需检查及其覆盖范围，通过后配置为必需状态检查；缺少 CI 时记录待配置。
+3. 配置主分支必须经 PR、审查讨论解决、禁止强推和删除，并限制绕过者。
+4. 多人项目默认至少 1 位其他维护者批准；单人项目设为 0，PR 中仍记录自审。
+5. 默认启用 Squash merge，并将默认合并提交标题设为 PR 标题；其他合并方式按已确认差异配置。
+6. 用实际 PR 核实配置生效；仓库权限或套餐不支持时记录限制及人工把关办法。
+
+不得把模板文档检查、workflow 已触发或设置已保存写成项目 CI 通过或保护已生效。
+需要验证时按已有授权使用项目实际 workflow，例如 `gh workflow run <项目工作流> --ref <已推送分支>`，
+再查询对应运行并核对结果。初始化与普通修改不自动授权推送、远程设置变更或生产发布。
+
+设置能力及语法参考 [GitHub 分支保护说明](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)
+与 [GitHub Actions workflow 语法](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)。
 
 ## 数据迁移与兼容性
 待填写或不适用。

@@ -304,6 +304,34 @@ async function testProjectReadme() {
   return pass('项目 README) 默认初始化及 --force 均保留项目已有说明');
 }
 
+async function testGithubFiles() {
+  const target = await makeTempDir();
+  await mkdir(path.join(target, '.github/workflows'), { recursive: true });
+  const existing = path.join(target, '.github/workflows/ci.yml');
+  await writeFile(existing, '已有项目的 CI\n');
+  const result = run(['--target', target]);
+  if (result.code !== 0) return fail('GitHub 模板) 已有项目 CI 不应阻止初始化', result.stderr);
+  const rel = '.github/PULL_REQUEST_TEMPLATE.md';
+  const source = await readFile(path.join(SCRIPT_DIR, '..', rel), 'utf8');
+  const generated = await readFile(path.join(target, rel), 'utf8').catch(() => null);
+  if (generated !== source) return fail('GitHub 模板) PR 模板分发内容不一致', rel);
+  if (await readFile(existing, 'utf8') !== '已有项目的 CI\n'
+      || existsSync(path.join(target, '.github/workflows/template-ci.yml'))
+      || existsSync(path.join(target, 'scripts/ci-checks.sh'))) {
+    return fail('GitHub 模板) 不得改动或引入目标项目 CI');
+  }
+  const conflictTarget = await makeTempDir();
+  await mkdir(path.join(conflictTarget, '.github'), { recursive: true });
+  const existingPr = path.join(conflictTarget, rel);
+  await writeFile(existingPr, '已有项目的 PR 模板\n');
+  const conflict = run(['--target', conflictTarget]);
+  if (conflict.code !== 1 || await readFile(existingPr, 'utf8') !== '已有项目的 PR 模板\n'
+      || existsSync(path.join(conflictTarget, 'AGENTS.md'))) {
+    return fail('GitHub 模板) 已有 PR 模板应保留且不能部分写入', conflict.stdout + conflict.stderr);
+  }
+  return pass('GitHub 模板) 仅分发 PR 模板，保留项目 CI，冲突时无部分写入');
+}
+
 async function main() {
   const probe = spawnSync('git', ['--version'], { encoding: 'utf8' });
   if (probe.status !== 0) {
@@ -326,6 +354,7 @@ async function main() {
   await testExtraSafety();
   await testClaimStates();
   await testProjectReadme();
+  await testGithubFiles();
 
   for (const dir of tempDirs) {
     await rm(dir, { recursive: true, force: true });

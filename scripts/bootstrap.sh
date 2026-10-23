@@ -66,7 +66,7 @@ tar -xzf "$temporary/template.tar.gz" --strip-components=1 -C "$source_dir" || f
 # 只分发指定模板文件，不分发维护记录、测试或仓库历史。
 for rel in AGENTS.md CLAUDE.md MEMORY.md HANDOFF.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
   .handoff/CONTEXT.md .handoff/CHECKPOINT.md .claude/settings.json \
-  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs; do
+  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs .github/PULL_REQUEST_TEMPLATE.md; do
   [[ -f "$source_dir/$rel" && ! -L "$source_dir/$rel" ]] || fail "模板缺少普通文件：$rel；未修改项目文件。"
   mkdir -p "$stage/$(dirname "$rel")"
   cp "$source_dir/$rel" "$stage/$rel"
