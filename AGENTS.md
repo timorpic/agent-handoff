@@ -1,5 +1,12 @@
 # AGENTS.md
 
+> **本机禁令（用户级常驻规则，优先于本文件其余内容）**
+> 这台服务器上永远不执行任何编译、构建或测试构建，所有构建一律交给 GitHub Actions。
+> 完整规则见 `~/.claude/CLAUDE.md`、`~/.codex/AGENTS.md`、`~/.pi/agent/AGENTS.md`（正文不在此复制）。
+> 本机只做代码编辑、静态阅读、lint 与 `tsc --noEmit`；`npm run dev` 可跑已构建的开发服务器。
+> 需要构建时用 `gh workflow run <workflow>`，不得为了发布前验证在本机运行。
+> 该禁令由三层强制：全局指令文件 + 各运行时的 PreToolUse/tool_call 拦截 + 本文件。
+
 > 协议版本：30a331e（模板仓库 commit SHA，2026-10-20）。
 > 项目启动入口，也是多 Agent 协作的单一事实来源（SSOT）。详细工作规则统一维护在 docs/AGENT-RULES.md。
 > 下面的读取要求是工作步骤；不能只读本入口而忽略适用的详细规则。
