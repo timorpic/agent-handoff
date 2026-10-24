@@ -68,3 +68,10 @@
 ## 发布入口
 发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 17 节，执行与回滚见 DEPLOYMENT.md。
 组件发布等流程只有实际存在时才补充。
+
+## 本模板仓库的研发治理
+
+本仓库采用 [研发治理](AI-GOVERNANCE.md) 的任务契约与范围检查。
+该门禁仅接入模板自身 CI，不修改初始化脚本，不分发目标项目 workflow。
+本机可运行 `node --check scripts/ai-check.mjs`、`sh scripts/check-docs.sh` 和范围静态检查；
+新增回归仅由 GitHub Actions 执行。远程分支保护与四客户端行为验收仍待实际核实。

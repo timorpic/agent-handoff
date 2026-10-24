@@ -43,5 +43,38 @@ jobs:
         run: node scripts/init.test.mjs
       - name: Check handoff helper
         run: node --test scripts/handoff.test.mjs
+      - name: Check governance checker
+        run: node --test scripts/ai-check.test.mjs
       - name: Check shell initialization
         run: bash scripts/bootstrap.test.sh
+
+  task-scope:
+    name: task-scope
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check task contract and changed paths
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import { execFileSync } from 'node:child_process';
+          const lines = (process.env.PR_BODY ?? '').split(/\r?\n/).filter(line => line.startsWith('Task-Contract:'));
+          if (lines.length !== 1 || !/^Task-Contract: \.ai\/tasks\/[a-zA-Z0-9_-]+\.json$/.test(lines[0])) {
+            console.error('PR 正文须包含唯一的 Task-Contract: .ai/tasks/<task_id>.json 行');
+            process.exit(1);
+          }
+          execFileSync(process.execPath, ['scripts/ai-check.mjs', lines[0].slice(15), process.env.BASE_SHA, process.env.HEAD_SHA], { stdio: 'inherit' });
+          JS
