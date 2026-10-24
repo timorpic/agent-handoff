@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "task_id": "handoff-dirty-records",
+  "goal": "防止接力保存改写已跟踪现场文件，并明确提交收尾顺序",
+  "allowed_paths": [
+    ".ai/tasks/handoff-dirty-records.json",
+    "AGENTS.md",
+    "HANDOFF.md",
+    "docs/HANDOFF-HELPER.md",
+    "scripts/handoff.mjs",
+    "scripts/handoff.test.mjs",
+    "docs/INITIALIZATION.md"
+  ],
+  "forbidden_paths": [
+    ".handoff/**",
+    "MEMORY.md"
+  ],
+  "constraints": {
+    "allow_new_dependencies": false,
+    "allow_database_changes": false,
+    "allow_api_breaking_changes": false,
+    "allow_unrelated_refactor": false
+  },
+  "acceptance": [
+    "claim/save 写入前拒绝已跟踪的现场记录且不生成备份或改变暂存区",
+    "正常忽略的现场记录仍可保存且不新增 Git 改动",
+    "模板保留空白 draft，正式文档在提交前完成收尾",
+    "本机仅静态检查，回归测试留给 GitHub Actions"
+  ]
+}
