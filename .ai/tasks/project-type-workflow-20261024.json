@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "task_id": "project-type-workflow-20261024",
+  "goal": "按用户纠正，依据模板工具、配置脚本或静态网站的项目类型简化分支流程，去除不适用的软件发布要求",
+  "allowed_paths": [
+    ".ai/tasks/project-type-workflow-20261024.json",
+    "docs/AGENT-RULES.md",
+    "docs/DEVELOPMENT.md",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    "README.md"
+  ],
+  "forbidden_paths": [
+    ".github/workflows/**",
+    ".env",
+    ".env.local",
+    "data/**"
+  ],
+  "constraints": {
+    "allow_new_dependencies": false,
+    "allow_database_changes": false,
+    "allow_api_breaking_changes": false,
+    "allow_unrelated_refactor": false
+  },
+  "acceptance": [
+    "模板按项目类型选择流程，Git Flow 仅限明确采用的软件项目",
+    "Sub-Rule 与 Swiseus 删除发布冻结、开发分支回流和固定分支寿命要求",
+    "PR 模板反映配置语义/静态网站/模板兼容性风险",
+    "保留主分支、现有 CI、审批、版本及本机禁令；静态范围与文档检查通过"
+  ]
+}
