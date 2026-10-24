@@ -354,6 +354,10 @@ async function atomic(root, relative, content) {
   } finally { await rm(path.join(root, temporary), { force: true }); }
 }
 async function persist(data, checkpointText, contextText, token, backup) {
+  // Ignore rules do not protect files already in the index (including staged additions).
+  const tracked = git(data.root, ['ls-files', '-z', '--', CONTEXT, CHECKPOINT]).split('\0').filter(Boolean);
+  assert(tracked.length === 0,
+    `接力现场文件仍被 Git 跟踪，拒绝写入：${tracked.join('、')}。模板仓库须保留空白 draft；目标项目核对后用 git rm --cached -- <路径> 取消跟踪并确认忽略生效。助手不会修改暂存区。`);
   assert(Buffer.byteLength(checkpointText) < 4 * 1024 * 1024 && Buffer.byteLength(contextText) < 4 * 1024 * 1024,
     '生成的接力记录超过读取上限；请精简结果或缩小工作区后重试，未写入记录');
   assert(await regular(data.root, CONTEXT) === data.contextText, 'CONTEXT 在核对后发生变化，停止写入');

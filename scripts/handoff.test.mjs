@@ -300,3 +300,36 @@ test('HEAD drift in identity section is reported even without helper snapshot me
   const inspected = cli(root, 'inspect', '--json');
   assert.match(JSON.parse(inspected.stdout).warnings.join(' '), /HEAD 已变化/);
 });
+
+for (const command of ['claim', 'save']) {
+  for (const trackedPath of [contexts, checkpoints]) {
+    test(`${command} refuses tracked ${trackedPath} without writing records or changing the index`, async t => {
+      const root = await fixture(t);
+      if (command === 'save') assert.equal(claim(root).code, 0);
+      const input = command === 'save' ? await resultFile(root) : null;
+      git(root, 'add', '-f', '--', trackedPath);
+      const before = await preserved(root);
+      const oldContext = await readFile(path.join(root, contexts));
+      const oldCheckpoint = await readFile(path.join(root, checkpoints));
+      const oldNames = (await readdir(path.join(root, '.handoff'))).sort();
+      const result = command === 'claim' ? claim(root)
+        : cli(root, 'save', '--agent', 'receiver-1', '--input', input);
+      assert.equal(result.code, 1);
+      assert.match(result.stderr, /仍被 Git 跟踪/);
+      assert.deepEqual(await readFile(path.join(root, contexts)), oldContext);
+      assert.deepEqual(await readFile(path.join(root, checkpoints)), oldCheckpoint);
+      assert.deepEqual((await readdir(path.join(root, '.handoff'))).sort(), oldNames);
+      assert.deepEqual(await preserved(root), before);
+    });
+  }
+}
+
+test('claim and save ignored records leave Git status unchanged', async t => {
+  const root = await fixture(t);
+  const before = git(root, 'status', '--porcelain=v1', '--untracked-files=all');
+  assert.equal(claim(root).code, 0);
+  const input = await resultFile(root);
+  const saved = cli(root, 'save', '--agent', 'receiver-1', '--input', input);
+  assert.equal(saved.code, 0, saved.stderr);
+  assert.equal(git(root, 'status', '--porcelain=v1', '--untracked-files=all'), before);
+});
