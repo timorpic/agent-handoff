@@ -43,10 +43,11 @@
 | 初始化、接管、交接或异常恢复 | 详细规则第 18 节及 HANDOFF.md |
 | 多客户端接入、共享技能、局部作用域 | 详细规则第 19 节及 docs/MULTI-AGENT.md |
 
-## 本仓库研发治理
+## 研发治理
 
-仅本模板仓库（存在 docs/INITIALIZATION.md）修改前读取 docs/AI-GOVERNANCE.md，
-建立可审查的 `.ai/tasks/<task_id>.json` 任务契约；目标项目按自身开发文档接入门禁。
+修改前读取 [研发治理](docs/AI-GOVERNANCE.md)，
+按 `.ai/templates/task.json` 建立可审查的 `.ai/tasks/<task_id>.json` 任务契约。
+新项目按自身开发文档接入 CI 范围门禁；文件已分发不等于 CI 或远程保护已启用。
 现场仍用现有 CONTEXT/CHECKPOINT，禁止另建第二套任务状态；契约不产生新授权。
 
 ## 始终遵守

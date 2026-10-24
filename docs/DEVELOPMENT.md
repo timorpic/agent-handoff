@@ -29,8 +29,9 @@
 ## GitHub Actions 与仓库设置
 
 目标项目自行设计和维护 GitHub Actions 工作流、检查命令、运行时、服务及必需检查名称。
-本模板不提供 CI 示例、不生成目标项目 workflow，也不安装项目检查入口。
-初始化仅分发 PR 模板；已有项目 CI 保持原样，模板仓库自身的 CI 不分发。
+本模板不生成目标项目 workflow；分发 PR 模板、治理规则、`.ai/templates/task.json` 和
+`scripts/ai-check.mjs`。按 [研发治理](AI-GOVERNANCE.md) 将范围检查加入项目 CI，
+并补齐项目实际的 lint、类型检查、测试和构建命令；已有项目 CI 保持原样，模板自身 CI 不分发。
 构建与测试全部在 GitHub Actions 执行，本机只做允许的静态检查。
 
 初始化后按项目已有或自行建立的 CI 逐项核实并记录证据：
@@ -69,9 +70,12 @@
 发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 17 节，执行与回滚见 DEPLOYMENT.md。
 组件发布等流程只有实际存在时才补充。
 
-## 本模板仓库的研发治理
+## 研发治理与初始化验收
 
-本仓库采用 [研发治理](AI-GOVERNANCE.md) 的任务契约与范围检查。
-该门禁仅接入模板自身 CI，不修改初始化脚本，不分发目标项目 workflow。
+新项目采用 [研发治理](AI-GOVERNANCE.md) 的任务契约与范围检查。
+初始化分发规则、检查器和契约样例，不分发 `.ai/tasks/` 下的维护历史，也不生成项目 workflow。
+每个项目必须在真实 PR 上核对缺失契约或越界变更能使独立范围检查失败，
+再按实际权限配置必需检查；仅生成文件不能宣称门禁已启用。
+模板仓库自身通过 `template-checks` 和 `task-scope` 验证分发行为及 PR 范围。
 本机可运行 `node --check scripts/ai-check.mjs`、`sh scripts/check-docs.sh` 和范围静态检查；
 新增回归仅由 GitHub Actions 执行。远程分支保护与四客户端行为验收仍待实际核实。

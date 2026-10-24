@@ -1,8 +1,9 @@
-# 本仓库 AI 研发治理
+# AI 研发治理
 
-本次依据用户要求将行为约束与质量验证落地到 agent-handoff。复用根 AGENTS.md、详细规则、
-MEMORY 和人工接力协议，不增加自动调度或第二套状态系统。本文件是本仓库项目约束，
-不修改协议正文；初始化工具保持原样，不自动分发本仓库门禁到其他项目。
+本规则随模板分发，适用于以后初始化的新项目。复用 AGENTS.md、详细规则、MEMORY
+和人工接力协议，不增加自动调度或第二套任务状态。Node 与 Shell 初始化均复制本文件、
+`scripts/ai-check.mjs` 和 `.ai/templates/task.json`；不复制模板的任务历史或 CI，
+也不自动向已有业务项目推广。具体质量命令和远程保护由目标项目配置并核实。
 
 ## 行为、证据与交付
 
@@ -17,12 +18,15 @@ MEMORY 和人工接力协议，不增加自动调度或第二套状态系统。�
   不因实现完成声称全部测试通过或无安全风险。
 
 现场进度仍记录在 `.handoff/CONTEXT.md` 和 `.handoff/CHECKPOINT.md`；长期事实留在 MEMORY / ADR。
-本仓库作为分发模板保留它们的空白 draft，不写入本轮历史；本轮证据由差异、契约和交付报告承载。
+新项目首次生成时保持空白 draft，有实际任务后再填写自身现场。仅模板仓库保留受跟踪的
+空白分发文件，不将维护历史写入；模板维护证据由差异、契约和交付报告承载。
 
 ## 任务契约与范围检查
 
-每条 PR 增加一个 `.ai/tasks/<task_id>.json`，格式参考
-本仓库的 `.ai/tasks/engineering-governance.json`。task_id 与文件名必须一致。
+每条 PR 增加一个 `.ai/tasks/<task_id>.json`，从 `.ai/templates/task.json` 复制并填写。
+样例不是已经获准的任务；必须按实际授权收窄路径、填写目标与验收，不直接沿用宽泛占位范围。
+例如建立 `.ai/tasks/task.json` 时，task_id 为 `task`；改名时同步修改 ID 与自身允许路径。
+契约自身也应列入 allowed_paths，禁止路径优先于允许路径。
 `allowed_paths` 与 `forbidden_paths` 仅支持精确路径及 `目录/**`，禁止路径优先。
 constraints 的四个布尔字段是人工审查约束，脚本不宣称能检测语义、数据库/API 或依赖变化。
 acceptance 是非空验收列表。历史契约保留以便追溯，不用新任务覆盖旧契约。
@@ -30,13 +34,14 @@ acceptance 是非空验收列表。历史契约保留以便追溯，不用新任
 PR 正文必须有且仅有一行（不加反引号）：
 
 ```text
-Task-Contract: .ai/tasks/engineering-governance.json
+Task-Contract: .ai/tasks/task.json
 ```
 
-本地静态检查（不执行测试、不产生制品）：
+范围检查需要 Node.js 与 Git；Shell 初始化本身仍无需这两个工具。
+本地静态检查（先建立 Git 基准提交，不执行测试、不产生制品）：
 
 ```sh
-node scripts/ai-check.mjs .ai/tasks/engineering-governance.json HEAD
+node scripts/ai-check.mjs .ai/tasks/task.json HEAD
 node --check scripts/ai-check.mjs
 sh scripts/check-docs.sh
 ```
@@ -47,17 +52,27 @@ CI 模式传入 PR 的 base SHA 和 head SHA，对完整提交差异检查，不
 
 ## CI、权限与人工审核
 
-现有 `template-checks` 保留文档、初始化、交接和 shell 回归；新增范围检查回归。
-独立 `task-scope` 检查 PR 契约与完整差异，缺失契约即失败。推送及手动触发仍执行模板回归。
-模板没有应用构建任务，不添加空构建步骤假装验证。所有测试仅在 GitHub Actions 执行。
+新项目在自己的 GitHub Actions 中接入独立范围检查：
+
+1. 获取 PR 的 base SHA、head SHA 和正文，拉取完整历史并检出 head；不要把合并提交当作范围基准。
+2. 从正文读取唯一且格式为 `Task-Contract: .ai/tasks/<task_id>.json` 的独立行；缺失、重复或非法格式直接失败，不回退到历史契约。
+3. 将契约路径、base SHA、head SHA 作为三个独立参数传给 `scripts/ai-check.mjs`，非零退出必须使检查失败。不要把 PR 正文拼进 shell 执行。
+4. 另外配置本项目实际的 lint、类型检查、单元/集成测试及构建；不适用项明确说明，不用空步骤伪装通过。
+5. 用真实 PR 核对缺失契约和越界变更被拒绝，再将范围检查与业务质量检查设为主分支必需项。
+
+初始化不生成 workflow，也不会启用远程保护；未接入时记录 `not_configured`，不能声称已强制拦截。
+模板自身保留 `template-checks` 与独立 `task-scope`，仅验证模板与范围检查器；这些测试和
+模板的维护契约不分发到目标项目。所有测试与构建仅在 GitHub Actions 执行。
 
 重要边界：契约、检查器、workflow 都是可修改的仓库文件，PR 可以同时修改它们。
 检查通过只证明使用该份策略进行了文件级比较，不能证明用户授权、文件内修改符合需求或模型诚实。
 维护者必须审查契约差异及其用户依据，并重点审查门禁自身的修改；不能自批扩大范围。
-workflow 不使用 pull_request_target、不读取密钥、不向 PR 写入；使用只读 contents 权限。
+范围检查 workflow 应使用 `pull_request` 和只读 contents 权限，不使用 `pull_request_target`
+执行 PR 代码，不读取密钥、不向 PR 写入。
 
-仓库管理员应把 `template-checks` 和 `task-scope` 设为必需，要求 PR、讨论解决、人工审查，
-禁止主分支强推/删除并限制绕过。远程配置属于外部操作，本轮未变更、未验证，不能声称已强制阻止合并。
+仓库管理员应把本项目实际的质量与范围检查设为必需，要求 PR、讨论解决、人工审查，
+禁止主分支强推/删除并限制绕过；模板自身对应 `template-checks` 与 `task-scope`。
+按实际权限与套餐核实配置结果，不支持时记录限制与人工替代流程，不能声称已强制阻止合并。
 需要升级 Action 引用时应核对可信完整 SHA；本次保留现有 Action 版本，不臆造固定值。
 
 ## 四客户端的统一人工回归
@@ -76,4 +91,5 @@ workflow 不使用 pull_request_target、不读取密钥、不向 PR 写入；�
 | 质疑有证据的正确结论 | 重新核验，不无依据改口 |
 
 记录违规次数、越界文件数、实际测试失败和虚假完成声明，未运行的工具标 not_run。
-当前四客户端行为回归均未执行；文件存在和静态检查通过不替代这些验收。
+每个项目分别记录已核实的客户端与未运行项，不继承模板或其他项目的回归结论；
+文件存在和静态检查通过不替代这些验收。
