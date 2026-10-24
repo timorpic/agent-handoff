@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "task_id": "governance-diff-boundaries",
+  "goal": "修复已核实的范围检查边界：排除上游独有改动，保留暂存与未暂存文件的独立覆盖",
+  "allowed_paths": [
+    ".ai/tasks/governance-diff-boundaries.json",
+    "scripts/ai-check.mjs",
+    "scripts/ai-check.test.mjs",
+    "docs/AI-GOVERNANCE.md"
+  ],
+  "forbidden_paths": [
+    "MEMORY.md",
+    "HANDOFF.md",
+    "docs/AGENT-RULES.md",
+    ".handoff/**",
+    ".github/workflows/**"
+  ],
+  "constraints": {
+    "allow_new_dependencies": false,
+    "allow_database_changes": false,
+    "allow_api_breaking_changes": false,
+    "allow_unrelated_refactor": false
+  },
+  "acceptance": [
+    "PR 范围从 merge base 比较到 head，不把上游独有变更算入任务",
+    "工作区将暂存、未暂存和未跟踪路径取并集，即使工作区内容还原也不漏掉暂存变更",
+    "新增两项行为回归；只在 GitHub Actions 执行测试；Sub-Rule 保留不引入 CI 约定"
+  ]
+}
