@@ -76,7 +76,7 @@ const ROOT_FILES = [
 const WALK_DIRS = ['adapters', 'docs', 'skills'];
 
 // 其它固定复制项（scripts/init.mjs 一并复制：目标项目里要能执行 --module 追加）
-const EXTRA_FILES = ['scripts/check-docs.sh', 'scripts/init.mjs', 'scripts/handoff.mjs', '.github/PULL_REQUEST_TEMPLATE.md', '.claude/settings.json'];
+const EXTRA_FILES = ['scripts/check-docs.sh', 'scripts/init.mjs', 'scripts/handoff.mjs', 'scripts/ai-check.mjs', '.ai/templates/task.json', '.github/PULL_REQUEST_TEMPLATE.md', '.claude/settings.json'];
 
 // 现场层：从空白模板复制后仅替换 project_id，status 保持 draft
 const HANDOFF_TEMPLATES = ['.handoff/CONTEXT.md', '.handoff/CHECKPOINT.md'];
@@ -120,8 +120,8 @@ const HELP_TEXT = [
   '  1. 复制协议层与项目层文件（AGENTS.md、CLAUDE.md、README.md、MEMORY.md、HANDOFF.md、',
   '     PROMPTS.md、DESIGN.md、CHANGELOG.md、TODO.md、.gitignore、adapters/**、docs/**、',
   '     skills/**、scripts/check-docs.sh、scripts/init.mjs、scripts/handoff.mjs、',
-  '     .github/PULL_REQUEST_TEMPLATE.md、.claude/settings.json）。',
-  '  2. 不复制 .git/、.handoff 的已有内容、docs 下的模板专属初始化说明。',
+  '     scripts/ai-check.mjs、.ai/templates/task.json、.github/PULL_REQUEST_TEMPLATE.md、.claude/settings.json）。',
+  '  2. 不复制 .git/、.ai/tasks/ 的维护历史、.handoff 的已有内容、模板专属说明及模板 CI。',
   '  3. 对 AGENTS.md、README.md 去掉只属于模板仓库的引用（目标项目里不该出现该文件名）。',
   '  4. 生成空白 draft 的 .handoff/CONTEXT.md 与 .handoff/CHECKPOINT.md。',
   '  5. 建立 .claude/skills -> ../skills、.gemini/antigravity/skills -> ../../skills。',

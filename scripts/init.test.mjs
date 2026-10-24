@@ -332,6 +332,54 @@ async function testGithubFiles() {
   return pass('GitHub 模板) 仅分发 PR 模板，保留项目 CI，冲突时无部分写入');
 }
 
+async function testGovernanceDistribution() {
+  const target = await makeTempDir();
+  const generated = run(['--target', target]);
+  if (generated.code !== 0) return fail('治理分发) 初始化失败', generated.stderr);
+  for (const rel of ['scripts/ai-check.mjs', '.ai/templates/task.json', 'docs/AI-GOVERNANCE.md']) {
+    const source = await readFile(path.join(SCRIPT_DIR, '..', rel), 'utf8');
+    if (await readFile(path.join(target, rel), 'utf8') !== source)
+      return fail('治理分发) 文件内容不一致', rel);
+  }
+  if (existsSync(path.join(target, '.ai/tasks')))
+    return fail('治理分发) 不得导入模板维护任务历史');
+  const agents = await readFile(path.join(target, 'AGENTS.md'), 'utf8');
+  if (!agents.includes('[研发治理](docs/AI-GOVERNANCE.md)') || agents.includes('## 本仓库研发治理'))
+    return fail('治理分发) 新项目入口没有接入通用规则');
+
+  const git = args => spawnSync('git', args, { cwd: target, encoding: 'utf8' });
+  for (const args of [
+    ['init', '-q'], ['add', '.'],
+    ['-c', 'user.name=fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'baseline'],
+  ]) {
+    const result = git(args);
+    if (result.status !== 0) return fail('治理分发) 无法建立 Git 基准', result.stderr);
+  }
+  await mkdir(path.join(target, '.ai/tasks'), { recursive: true });
+  const contract = JSON.parse(await readFile(path.join(target, '.ai/templates/task.json'), 'utf8'));
+  contract.goal = '验证新项目分发的范围检查器';
+  contract.allowed_paths = ['.ai/tasks/task.json', 'src/**'];
+  contract.acceptance = ['src 内允许修改；禁止路径和范围外路径拒绝'];
+  await writeFile(path.join(target, '.ai/tasks/task.json'), JSON.stringify(contract));
+  await mkdir(path.join(target, 'src'), { recursive: true });
+  await writeFile(path.join(target, 'src/allowed.txt'), 'allowed\n');
+  const check = () => spawnSync(process.execPath,
+    ['scripts/ai-check.mjs', '.ai/tasks/task.json', 'HEAD'], { cwd: target, encoding: 'utf8' });
+  if (check().status !== 0) return fail('治理分发) 合法任务应通过');
+  await mkdir(path.join(target, 'src/database/migrations'), { recursive: true });
+  const forbidden = path.join(target, 'src/database/migrations/change.sql');
+  await writeFile(forbidden, 'forbidden\n');
+  let rejected = check();
+  if (rejected.status !== 1 || !rejected.stdout.includes('src/database/migrations/change.sql'))
+    return fail('治理分发) 允许目录内的禁止路径应被拒绝');
+  await rm(forbidden);
+  await writeFile(path.join(target, 'outside.txt'), 'outside\n');
+  rejected = check();
+  if (rejected.status !== 1 || !rejected.stdout.includes('outside.txt'))
+    return fail('治理分发) 未跟踪的范围外文件应被拒绝');
+  return pass('治理分发) 新项目获得可用检查器和样例，不导入历史，允许/禁止/越界检查正确');
+}
+
 async function main() {
   const probe = spawnSync('git', ['--version'], { encoding: 'utf8' });
   if (probe.status !== 0) {
@@ -355,6 +403,7 @@ async function main() {
   await testClaimStates();
   await testProjectReadme();
   await testGithubFiles();
+  await testGovernanceDistribution();
 
   for (const dir of tempDirs) {
     await rm(dir, { recursive: true, force: true });

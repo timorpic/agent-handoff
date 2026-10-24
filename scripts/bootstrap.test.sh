@@ -7,11 +7,14 @@ trap 'rm -rf -- "$temporary"' EXIT
 mkdir -p "$temporary/archive/template" "$temporary/bin" "$temporary/project with spaces" "$temporary/empty" "$temporary/scratch"
 for rel in AGENTS.md CLAUDE.md README.md README.project.md MEMORY.md HANDOFF.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
   .handoff/CONTEXT.md .handoff/CHECKPOINT.md .claude/settings.json \
-  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs .github/PULL_REQUEST_TEMPLATE.md; do
+  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs scripts/ai-check.mjs .ai/templates/task.json .github/PULL_REQUEST_TEMPLATE.md; do
   mkdir -p "$temporary/archive/template/$(dirname "$rel")"
   cp "$root/$rel" "$temporary/archive/template/$rel"
 done
 for dir in docs adapters skills; do cp -R "$root/$dir" "$temporary/archive/template/$dir"; done
+# 下载包包含模板维护历史，但新项目不能继承它。
+mkdir -p "$temporary/archive/template/.ai/tasks"
+printf '{"task_id":"template-history"}\n' > "$temporary/archive/template/.ai/tasks/template-history.json"
 # 下载包包含模板自身 CI，但初始化不得分发它。
 mkdir -p "$temporary/archive/template/.github/workflows"
 cp "$root/.github/workflows/template-ci.yml" "$temporary/archive/template/.github/workflows/template-ci.yml"
@@ -53,6 +56,10 @@ grep -q '^- project_id: my-project$' "$temporary/project with spaces/.handoff/CO
 grep -q '^- 稳定 project_id：my-project$' "$temporary/project with spaces/MEMORY.md"
 cmp "$root/README.project.md" "$temporary/project with spaces/README.md"
 cmp "$root/.github/PULL_REQUEST_TEMPLATE.md" "$temporary/project with spaces/.github/PULL_REQUEST_TEMPLATE.md"
+cmp "$root/scripts/ai-check.mjs" "$temporary/project with spaces/scripts/ai-check.mjs"
+cmp "$root/.ai/templates/task.json" "$temporary/project with spaces/.ai/templates/task.json"
+[[ ! -e "$temporary/project with spaces/.ai/tasks" ]]
+grep -q "docs/AI-GOVERNANCE.md" "$temporary/project with spaces/AGENTS.md"
 [[ ! -e "$temporary/project with spaces/.github/workflows" ]]
 [[ ! -e "$temporary/project with spaces/scripts/ci-checks.sh" ]]
 grep -q '^- status: draft$' "$temporary/project with spaces/.handoff/CHECKPOINT.md"
