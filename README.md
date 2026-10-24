@@ -174,7 +174,7 @@ node scripts/handoff.mjs save --agent claude-session-1 --input result.json --han
 - [共享工作流](skills/README.md)
 - [统一 Git 标准](docs/AGENT-RULES.md#9-git)与[项目 CI 和仓库设置](docs/DEVELOPMENT.md#github-actions-与仓库设置)
 
-新项目默认采用短期任务分支、规范化 Commit/PR 标题、PR 审查与 Squash merge。
+新项目按文档/模板工具、配置脚本、静态网站或应用软件选择流程；默认采用短期任务分支、规范化 Commit/PR 标题、PR 审查与 Squash merge，不默认套用软件发布模型。
 初始化只分发 PR 模板，不提供或生成目标项目 CI；目标项目自行维护 CI 并核实远程主分支保护。
 模板自身的检查仅由本仓库 GitHub Actions 执行，不分发到目标项目。
 
