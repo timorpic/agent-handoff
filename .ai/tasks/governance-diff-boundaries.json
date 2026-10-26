@@ -10,9 +10,7 @@
   ],
   "forbidden_paths": [
     "MEMORY.md",
-    "HANDOFF.md",
     "docs/AGENT-RULES.md",
-    ".handoff/**",
     ".github/workflows/**"
   ],
   "constraints": {

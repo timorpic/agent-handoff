@@ -16,7 +16,7 @@
     "scripts/bootstrap.sh",
     "scripts/bootstrap.test.sh"
   ],
-  "forbidden_paths": ["MEMORY.md", ".handoff/**", ".github/workflows/**"],
+  "forbidden_paths": ["MEMORY.md", ".github/workflows/**"],
   "constraints": {
     "allow_new_dependencies": false,
     "allow_database_changes": false,

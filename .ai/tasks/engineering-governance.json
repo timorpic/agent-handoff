@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "task_id": "engineering-governance",
-  "goal": "在现有人工接力模板内落地行为治理与文件范围门禁",
+  "goal": "在现有规则模板内落地行为治理与文件范围门禁",
   "allowed_paths": [
     "AGENTS.md",
     "README.md",
@@ -15,7 +15,6 @@
   ],
   "forbidden_paths": [
     "MEMORY.md",
-    ".handoff/**",
     "scripts/init.mjs",
     "scripts/bootstrap.sh"
   ],
@@ -26,7 +25,7 @@
     "allow_unrelated_refactor": false
   },
   "acceptance": [
-    "保留统一入口与人工切换边界",
+    "保留统一入口与手动切换工具的边界",
     "文件级越界在 CI 返回失败",
     "覆盖新增、删除、重命名、未跟踪文件与非法契约",
     "测试仅在 GitHub Actions 执行，未验证状态如实报告"

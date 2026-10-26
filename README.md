@@ -1,7 +1,11 @@
 # AI Rules Template
 
-面向 AI 编程工具（Claude Code、Codex 等）的通用项目治理模板：
-统一规则入口、长期知识、共享技能库与研发治理规则，供新项目一键初始化。
+面向 AI 编程工具的 Agent 项目模板：定义 Agent 的行为边界，
+提供统一规则入口、长期知识、共享技能库与研发治理规则，供新项目一键初始化。
+
+本仓库只作为 Agent 项目模板使用，不提供任务接力：不定义跨工具交接协议、
+活动任务上下文或检查点机制。它要回答的是「Agent 能做什么、不能做什么、依据在哪里」，
+工具切换由用户手动完成。
 
 模板不预设业务、技术栈或部署平台，不携带具体项目的历史，也不包含自动调度或跨工具并发能力。
 
@@ -40,9 +44,6 @@ bash /tmp/ai-rules-template-bootstrap.sh
 - 研发治理：任务契约与 PR 范围检查，见 [docs/AI-GOVERNANCE.md](docs/AI-GOVERNANCE.md)。
 - 初始化工具：`scripts/bootstrap.sh`（纯 Shell）与 `scripts/init.mjs`（零依赖 Node 生成器），
   以及只读一致性自检 `scripts/check-docs.sh`。
-
-模板不包含任务接力能力：不提供跨工具交接协议、活动任务上下文或检查点机制；
-多客户端共用同一套规则文件，工具切换由用户手动完成。
 
 ## 通过 Agent 接入
 

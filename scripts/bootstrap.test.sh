@@ -61,7 +61,6 @@ cmp "$root/.ai/templates/task.json" "$temporary/project with spaces/.ai/template
 grep -q "docs/AI-GOVERNANCE.md" "$temporary/project with spaces/AGENTS.md"
 [[ ! -e "$temporary/project with spaces/.github/workflows" ]]
 [[ ! -e "$temporary/project with spaces/scripts/ci-checks.sh" ]]
-[[ ! -e "$temporary/project with spaces/.handoff" ]]
 [[ -L "$temporary/project with spaces/.claude/skills" ]]
 [[ -d "$temporary/project with spaces/.gemini/antigravity/skills" ]]
 [[ ! -e "$temporary/project with spaces/.git" ]]

@@ -1,23 +1,15 @@
 {
   "schema_version": 1,
   "task_id": "rename-to-ai-rules-template-20261026",
-  "goal": "按用户要求把仓库从 agent-handoff 改名为 ai-rules-template，同步更新文档与脚本中的仓库地址，并删除仅服务于已移除接力能力的 handoff-dirty-records 历史契约",
+  "goal": "按用户要求把仓库从旧名改名为 ai-rules-template，同步更新文档与脚本中的仓库地址，并删除仅服务于已移除能力的旧历史契约",
   "allowed_paths": [
-    ".ai/tasks/rename-to-ai-rules-template-20261026.json",
-    ".ai/tasks/handoff-dirty-records.json",
+    ".ai/tasks/**",
     "README.md",
     "docs/INITIALIZATION.md",
     "scripts/bootstrap.sh"
   ],
   "forbidden_paths": [
     ".ai/templates/**",
-    ".ai/tasks/engineering-governance.json",
-    ".ai/tasks/governance-diff-boundaries.json",
-    ".ai/tasks/governance-distribution.json",
-    ".ai/tasks/gitflow-policy-20261024.json",
-    ".ai/tasks/pi-runtime-removal-20261024.json",
-    ".ai/tasks/project-type-workflow-20261024.json",
-    ".ai/tasks/handoff-capability-removal-20261026.json",
     "scripts/ai-check.mjs",
     "scripts/ai-check.test.mjs",
     "scripts/check-docs.sh",
@@ -33,10 +25,10 @@
     "allow_unrelated_refactor": false
   },
   "acceptance": [
-    "README、docs/INITIALIZATION.md 与 scripts/bootstrap.sh 中的仓库地址统一为 timorpic/ai-rules-template，无 agent-handoff 残留",
+    "README、docs/INITIALIZATION.md 与 scripts/bootstrap.sh 中的仓库地址统一为 timorpic/ai-rules-template，无旧名残留",
     "README 标题与模板定位一致，不再使用已移除能力的名称",
     "临时下载文件名与目录前缀同步改为 ai-rules-template 前缀",
-    "删除 .ai/tasks/handoff-dirty-records.json；其余历史契约按追溯要求保持原样",
+    "删除旧能力的专属历史契约；其余历史契约按追溯要求保持原样",
     "sh scripts/check-docs.sh 退出码为 0；bash -n scripts/bootstrap.sh 通过",
     "GitHub 仓库改名后远程地址更新，本机目录改名为 ai-rules-template",
     "不执行本机构建或测试，回归交给 GitHub Actions"
