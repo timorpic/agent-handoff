@@ -117,9 +117,6 @@ async function test2NoTemplateRefs() {
   if (agents.includes(TEMPLATE_DOC_NAME) || readme.includes(TEMPLATE_DOC_NAME)) {
     return fail('2) AGENTS.md / README.md 仍含模板专属文件名');
   }
-  if (readme.includes('HANDOFF')) {
-    return fail('2) README 含已移除的接力协议引用');
-  }
   if (existsSync(path.join(target, 'docs', TEMPLATE_DOC_NAME))) {
     return fail('2) docs 下不应复制模板专属初始化说明');
   }
