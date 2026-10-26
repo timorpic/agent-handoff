@@ -4,22 +4,19 @@
 # 退出码：0 全部通过；1 存在错误；2 环境不满足（不在仓库根目录）。
 #
 # 检查项：
-#   1. Markdown 相对链接目标是否存在（含 .handoff 现场层缺失的例外说明）。
+#   1. Markdown 相对链接目标是否存在。
 #   2. “<文件> 第 N[.M] 节”引用的章节标题是否存在于该文件。
-#   3. CHECKPOINT 的 handoff_claim 与“认领状态”是否为一致的合法单值（draft 模板可保留枚举）。
-#   4. 现场层 Git 跟踪状态：模板仓库应跟踪，目标项目应不跟踪但被忽略。
-#   5. 目标项目（无 docs/INITIALIZATION.md）是否仍引用模板专属文件。
-#   6. 模板仓库的 CONTEXT/CHECKPOINT 是否保持 draft。
-#   7. 技能前置元数据：skills/*/SKILL.md 的 frontmatter、name 与目录名是否一致。
-#   8. 技能目录共享：.claude/skills 与 .gemini/antigravity/skills 的相对软链能否解析。
-#   9. .claude/settings.json 是否为合法 JSON，且不含明文疑似凭据。
-#  10. .gitignore 是否整体忽略 skills/docs/.handoff，平台缓存规则是否齐全。
+#   3. 目标项目（无 docs/INITIALIZATION.md）是否仍引用模板专属文件。
+#   4. 技能前置元数据：skills/*/SKILL.md 的 frontmatter、name 与目录名是否一致。
+#   5. 技能目录共享：.claude/skills 与 .gemini/antigravity/skills 的相对软链能否解析。
+#   6. .claude/settings.json 是否为合法 JSON，且不含明文疑似凭据。
+#   7. .gitignore 是否整体忽略 skills/docs，平台缓存规则是否齐全。
 
 set -u
 
 
-if [ ! -f AGENTS.md ] || [ ! -f HANDOFF.md ]; then
-	printf 'ERROR: 请在仓库根目录执行（需要 AGENTS.md 与 HANDOFF.md）\n' >&2
+if [ ! -f AGENTS.md ]; then
+	printf 'ERROR: 请在仓库根目录执行（需要 AGENTS.md）\n' >&2
 	exit 2
 fi
 
@@ -114,10 +111,9 @@ if [ -s "$tmpdir/broken-links" ]; then
 fi
 
 # ---------- 2. 章节引用 ----------
-# 覆盖三种写法：
+# 覆盖两种写法：
 #   a. 显式文件名：xxx.md 第 N[.M] 节
 #   b. 简写：详细规则第 N[.M] 节  → docs/AGENT-RULES.md
-#   c. HANDOFF.md 内的自身简写：第 N[.M] 节（不含文件名或“详细规则”前缀）
 for f in $(find . -path ./.git -prune -o -name '*.md' -print | sort); do
 	awk -v file="$f" '
 		{
@@ -138,18 +134,6 @@ for f in $(find . -path ./.git -prune -o -name '*.md' -print | sort); do
 				n = m; sub(/^详细规则第 /, "", n); sub(/ 节$/, "", n)
 				print file "\tdocs/AGENT-RULES.md\t" n
 			}
-			# c. HANDOFF.md 自身简写
-			if (file ~ /HANDOFF\.md$/) {
-				rest = $0
-				while (match(rest, /第 [0-9]+(\.[0-9]+)? 节/)) {
-					m = substr(rest, RSTART, RLENGTH)
-					pre = substr(rest, 1, RSTART - 1)
-					rest = substr(rest, RSTART + RLENGTH)
-					if (pre ~ /(详细规则|\.md |上一节|本节|第 [0-9]+(\.[0-9]+)? 节)/) continue
-					n = m; sub(/^第 /, "", n); sub(/ 节$/, "", n)
-					print file "\t" file "\t" n
-				}
-			}
 		}' "$f"
 done >"$tmpdir/section-refs"
 sort -u "$tmpdir/section-refs" >"$tmpdir/section-refs.uniq"
@@ -166,53 +150,7 @@ while IFS='	' read -r file doc num; do
 	fi
 done <"$tmpdir/section-refs.uniq"
 
-# ---------- 3. 认领状态 ----------
-ckpt=.handoff/CHECKPOINT.md
-if [ -f "$ckpt" ]; then
-	claimed_field=$(grep -a -m1 '^- handoff_claim:' "$ckpt" |
-		sed 's/^- handoff_claim:[[:space:]]*//; s/（.*//; s/[[:space:]]*$//')
-	claim_row=$(grep -a -m1 '^| 认领状态 |' "$ckpt" |
-		sed 's/^| 认领状态 |//; s/|.*$//' |
-		sed 's/（.*//' |
-		tr '/' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -a -v '^$' | sort -u)
-	allowed_claims=$(printf '%s\n' open claimed declined expired not_applicable | sort -u)
-	checkpoint_status=$(grep -a -m1 '^- status:' "$ckpt" |
-		sed 's/^- status:[[:space:]]*//; s/[[:space:]]*$//')
-	case "$claimed_field" in
-	open|claimed|declined|expired|not_applicable) ;;
-	*) err "$ckpt 的 handoff_claim 不是合法状态：$claimed_field" ;;
-	esac
-	if [ -z "$claimed_field" ] || [ -z "$claim_row" ]; then
-		err "未能从 $ckpt 解析 handoff_claim 或“认领状态”"
-	elif [ "$checkpoint_status" = draft ] && [ "$claimed_field" = not_applicable ] &&
-		[ "$claim_row" = "$allowed_claims" ]; then
-		: # 空白 draft 模板保留完整枚举；活动现场必须填写实际状态。
-	else
-		if [ "$claimed_field" != "$claim_row" ]; then
-			err "handoff_claim 与“认领状态”不一致："
-			printf '  字段: %s\n  表格: %s\n' "$(echo "$claimed_field" | tr '\n' ' ')" "$(echo "$claim_row" | tr '\n' ' ')" >&2
-		fi
-	fi
-fi
-
-# ---------- 4. 现场层跟踪状态 ----------
-if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-	for p in .handoff/CONTEXT.md .handoff/CHECKPOINT.md; do
-		[ -f "$p" ] || continue
-		if is_template; then
-			is_tracked "$p" || err "模板仓库应跟踪 $p（否则 clone 后无法分发点目录）"
-		else
-			if is_tracked "$p"; then
-				err "目标项目仍在跟踪 $p，应执行 git rm --cached -- $p"
-			fi
-			ignored_by_pattern "$p" || err "目标项目未忽略 $p（检查 .gitignore 现场层规则）"
-		fi
-	done
-else
-	warn "当前目录不是 Git 仓库，跳过跟踪状态检查"
-fi
-
-# ---------- 5. 模板专属引用（目标项目） ----------
+# ---------- 3. 模板专属引用（目标项目） ----------
 if ! is_template; then
 	grep -a -rn --include='*.md' 'INITIALIZATION\.md' . 2>/dev/null |
 		grep -a -v '^\./\.git/' |
@@ -224,16 +162,7 @@ if ! is_template; then
 		done
 fi
 
-# ---------- 6. 模板仓库的空白 draft ----------
-if is_template; then
-	for p in .handoff/CONTEXT.md .handoff/CHECKPOINT.md; do
-		[ -f "$p" ] || continue
-		grep -a -q '^- status: draft' "$p" ||
-			err "模板仓库的 $p 应为 draft（若已当作实际现场使用，应改为不跟踪）"
-	done
-fi
-
-# ---------- 7. 技能前置元数据 ----------
+# ---------- 4. 技能前置元数据 ----------
 # 目标是「目录名 = name 且能被客户端解析」，不校验业务内容。
 if [ -d skills ]; then
 	for skill_md in skills/*/SKILL.md; do
@@ -297,7 +226,7 @@ if [ -d skills ]; then
 	done
 fi
 
-# ---------- 8. 技能目录共享 ----------
+# ---------- 5. 技能目录共享 ----------
 # 客户端目录整体不存在时跳过：不是每个项目都接这两个客户端。
 if [ -e .claude/skills ] || [ -L .claude/skills ]; then
 	check_skill_link .claude/skills ../skills
@@ -310,7 +239,7 @@ elif [ -d .gemini/antigravity ]; then
 	warn "存在 .gemini/antigravity/ 但没有 skills 链接（不使用该客户端时可忽略；需要时 ln -s ../../skills .gemini/antigravity/skills）"
 fi
 
-# ---------- 9. .claude/settings.json ----------
+# ---------- 6. .claude/settings.json ----------
 if [ -f .claude/settings.json ]; then
 	if command -v node >/dev/null 2>&1; then
 		json_err=$(node --input-type=commonjs \
@@ -337,13 +266,12 @@ if [ -f .claude/settings.json ]; then
 	done
 fi
 
-# ---------- 10. 忽略规则 ----------
+# ---------- 7. 忽略规则 ----------
 if [ -f .gitignore ]; then
-	for ignore_dir in skills docs .handoff; do
+	for ignore_dir in skills docs; do
 		case "$ignore_dir" in
 		skills) ignore_hint="会挡掉共享技能库，各客户端路径将指向空目录" ;;
 		docs) ignore_hint="会挡掉正式规则与决策记录" ;;
-		.handoff) ignore_hint="会吞掉 archive 与归档证据（只应忽略 CONTEXT/CHECKPOINT 等运行文件）" ;;
 		*) ignore_hint="会挡掉必须进 Git 的内容" ;;
 		esac
 		if grep -a -qE "^(/?\*\*/)?/?${ignore_dir}(/\\*{1,2})?/?[[:space:]]*$" .gitignore; then

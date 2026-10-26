@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/init.test.mjs —— scripts/init.mjs 的端到端自测（可选，零依赖）
 //
-// 用途：生成器与交接状态检查的回归测试，全部在临时目录里进行，结束后清理。
+// 用途：生成器的回归测试，全部在临时目录里进行，结束后清理。
 // 用法：node scripts/init.test.mjs        （在仓库任意位置执行均可；需要 node >= 18 与 git）
 // 退出码：0 全部通过；1 有失败用例；2 环境不满足（例如找不到 git）。
 //
@@ -74,7 +74,7 @@ function walkFiles(dirAbs, base = dirAbs) {
 async function test1DryRun() {
   const tmp = await makeTempDir();
   const target = path.join(tmp, 'proj');
-  const result = run(['--target', target, '--project-id', 'demo', '--dry-run']);
+  const result = run(['--target', target, '--dry-run']);
   if (result.code !== 0) return fail('1) --dry-run 退出码', 'exit=' + result.code);
   const before = readdirSync(tmp);
   if (before.length !== 0) return fail('1) --dry-run 不写盘', '临时目录出现了 ' + before.join(','));
@@ -82,20 +82,19 @@ async function test1DryRun() {
     '[复制] AGENTS.md',
     '[复制] README.md',
     '[复制] scripts/init.mjs',
-    '[生成] .handoff/CONTEXT.md',
     '[软链] .claude/skills -> ../skills',
     '[软链] .gemini/antigravity/skills -> ../../skills',
     'Markdown 链接（必须为空）：无（通过）',
   ];
   const missing = expects.filter((item) => !result.stdout.includes(item));
   if (missing.length > 0) return fail('1) --dry-run 计划内容', '缺少：' + missing.join(' | '));
-  return pass('1) --dry-run 不写盘且计划正确', 'target 未创建，7 个关键计划项齐全');
+  return pass('1) --dry-run 不写盘且计划正确', 'target 未创建，关键计划项齐全');
 }
 
 async function test2NoTemplateRefs() {
   const tmp = await makeTempDir();
   const target = path.join(tmp, 'proj');
-  const result = run(['--target', target, '--project-id', 'demo']);
+  const result = run(['--target', target]);
   if (result.code !== 0) return fail('2) 生成退出码', 'exit=' + result.code);
 
   const files = walkFiles(target);
@@ -118,8 +117,8 @@ async function test2NoTemplateRefs() {
   if (agents.includes(TEMPLATE_DOC_NAME) || readme.includes(TEMPLATE_DOC_NAME)) {
     return fail('2) AGENTS.md / README.md 仍含模板专属文件名');
   }
-  if (!readme.includes('人工接力协议](HANDOFF.md)')) {
-    return fail('2) README 顶部未替换为项目中立说明');
+  if (readme.includes('HANDOFF')) {
+    return fail('2) README 含已移除的接力协议引用');
   }
   if (existsSync(path.join(target, 'docs', TEMPLATE_DOC_NAME))) {
     return fail('2) docs 下不应复制模板专属初始化说明');
@@ -130,7 +129,7 @@ async function test2NoTemplateRefs() {
 async function test3CheckDocs() {
   const tmp = await makeTempDir();
   const target = path.join(tmp, 'proj');
-  const gen = run(['--target', target, '--project-id', 'demo']);
+  const gen = run(['--target', target]);
   if (gen.code !== 0) return fail('3) 生成退出码', 'exit=' + gen.code);
   const git = runShell('git init -q', target);
   if (git.code !== 0) return fail('3) git init 失败', git.stderr.trim());
@@ -144,9 +143,9 @@ async function test3CheckDocs() {
 async function test4RepeatConflict() {
   const tmp = await makeTempDir();
   const target = path.join(tmp, 'proj');
-  const first = run(['--target', target, '--project-id', 'demo']);
+  const first = run(['--target', target]);
   if (first.code !== 0) return fail('4) 首次生成', 'exit=' + first.code);
-  const repeat = run(['--target', target, '--project-id', 'demo']);
+  const repeat = run(['--target', target]);
   if (repeat.code !== 1) return fail('4) 重复执行退出码', '期望 1，实际 ' + repeat.code);
   if (!repeat.stderr.includes('冲突清单')) return fail('4) 未列出冲突清单');
   const conflictCount = (repeat.stderr.match(/^ {2}- /gm) || []).length;
@@ -227,18 +226,8 @@ async function testExtraSafety() {
   const traversal = run(['--module', '../escape']);
   if (traversal.code !== 2) fail('附加) 路径穿越应被拒绝', '实际 ' + traversal.code);
 
-  // 无 --project-id 时保持模板原文，不写空字符串
-  const tmp = await makeTempDir();
-  const target = path.join(tmp, 'proj');
-  const gen = run(['--target', target]);
-  if (gen.code !== 0) return fail('附加) 无 project-id 生成失败', 'exit=' + gen.code);
-  const context = await readFile(path.join(target, '.handoff', 'CONTEXT.md'), 'utf8');
-  if (!/- project_id: 未填（引用 MEMORY\.md 的稳定标识）/.test(context)) {
-    fail('附加) 未给 --project-id 时应保持模板原文');
-  }
-  if (!/- status: draft/m.test(context)) fail('附加) CONTEXT 应保持 draft');
-
   // 模拟软链失败 → 按条目形态回退，且 check-docs 仍通过
+  const tmp = await makeTempDir();
   const simTarget = path.join(tmp, 'sim');
   const sim = run(['--target', simTarget, '--module', 'src/api'], {
     env: { INIT_SIMULATE_SYMLINK_FAILURE: '1' },
@@ -251,44 +240,8 @@ async function testExtraSafety() {
   if (lines.length !== 2) fail('附加) 局部 CLAUDE.md 回退应为两行', '实际 ' + lines.length + ' 行');
   if (moduleClaude.includes('## 作用域')) fail('附加) 局部 CLAUDE.md 回退不得复制 AGENTS.md 正文');
 
-  if (failures === 0) pass('附加) 用法错误/穿越拒绝/未给 project-id/软链失败回退');
+  if (failures === 0) pass('附加) 用法错误/穿越拒绝/软链失败回退');
   return undefined;
-}
-
-async function testClaimStates() {
-  const failuresBefore = failures;
-  const tmp = await makeTempDir();
-  const target = path.join(tmp, 'proj');
-  const generated = run(['--target', target, '--project-id', 'claim-states']);
-  if (generated.code !== 0) return fail('认领状态) 生成失败');
-  if (runShell('git init -q', target).code !== 0) return fail('认领状态) git init 失败');
-  const checkpoint = path.join(target, '.handoff', 'CHECKPOINT.md');
-  const original = await readFile(checkpoint, 'utf8');
-  async function checkState(field, row, expectedCode, label, retainHint = true) {
-    const fieldValue = retainHint
-      ? original.match(/^- handoff_claim: (.*)$/m)[1].replace(/^not_applicable/, field)
-      : field;
-    const text = original
-      .replace(/^- status: draft$/m, '- status: active')
-      .replace(/^- handoff_claim: .*$/m, '- handoff_claim: ' + fieldValue)
-      .replace(/^\| 认领状态 \|.*$/m, '| 认领状态 | ' + row + ' |');
-    await writeFile(checkpoint, text);
-    const check = runShell('sh scripts/check-docs.sh', target);
-    if (check.code !== expectedCode) {
-      fail('认领状态) ' + label, 'exit=' + check.code + '\n' + check.stdout + check.stderr);
-    }
-  }
-  for (const value of ['open', 'claimed', 'declined', 'expired', 'not_applicable']) {
-    await checkState(value, value, 0, value);
-  }
-  await checkState('claimed', 'claimed', 0, '无枚举注释的实际状态', false);
-  await checkState('claimed', 'open', 1, '字段与表格冲突');
-  await checkState('unknown', 'unknown', 1, '未知状态');
-  await checkState('claimed', '', 1, '缺失表格状态');
-  await checkState('claimed', 'open / claimed / declined / expired / not_applicable', 1, '活动任务未填写表格状态');
-  if (failures === failuresBefore) {
-    pass('认领状态) 已验证合法单值、冲突、未知值与未填写状态', '模板枚举注释不再替代实际状态');
-  }
 }
 
 async function testProjectReadme() {
@@ -400,7 +353,6 @@ async function main() {
   await test5NoSymlink();
   await test6Modules();
   await testExtraSafety();
-  await testClaimStates();
   await testProjectReadme();
   await testGithubFiles();
   await testGovernanceDistribution();

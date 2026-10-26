@@ -5,9 +5,9 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 temporary=$(mktemp -d)
 trap 'rm -rf -- "$temporary"' EXIT
 mkdir -p "$temporary/archive/template" "$temporary/bin" "$temporary/project with spaces" "$temporary/empty" "$temporary/scratch"
-for rel in AGENTS.md CLAUDE.md README.md README.project.md MEMORY.md HANDOFF.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
-  .handoff/CONTEXT.md .handoff/CHECKPOINT.md .claude/settings.json \
-  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs scripts/ai-check.mjs .ai/templates/task.json .github/PULL_REQUEST_TEMPLATE.md; do
+for rel in AGENTS.md CLAUDE.md README.md README.project.md MEMORY.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
+  .claude/settings.json \
+  scripts/check-docs.sh scripts/init.mjs scripts/ai-check.mjs .ai/templates/task.json .github/PULL_REQUEST_TEMPLATE.md; do
   mkdir -p "$temporary/archive/template/$(dirname "$rel")"
   cp "$root/$rel" "$temporary/archive/template/$rel"
 done
@@ -52,7 +52,6 @@ expect_status 0 run --dry-run
 [[ -z "$(ls -A "$temporary/project with spaces")" ]]
 expect_status 0 run --project-id 'my-project' --ref feature/example
 grep -q '/feature/example$' "$TEST_URL_LOG"
-grep -q '^- project_id: my-project$' "$temporary/project with spaces/.handoff/CONTEXT.md"
 grep -q '^- 稳定 project_id：my-project$' "$temporary/project with spaces/MEMORY.md"
 cmp "$root/README.project.md" "$temporary/project with spaces/README.md"
 cmp "$root/.github/PULL_REQUEST_TEMPLATE.md" "$temporary/project with spaces/.github/PULL_REQUEST_TEMPLATE.md"
@@ -62,7 +61,7 @@ cmp "$root/.ai/templates/task.json" "$temporary/project with spaces/.ai/template
 grep -q "docs/AI-GOVERNANCE.md" "$temporary/project with spaces/AGENTS.md"
 [[ ! -e "$temporary/project with spaces/.github/workflows" ]]
 [[ ! -e "$temporary/project with spaces/scripts/ci-checks.sh" ]]
-grep -q '^- status: draft$' "$temporary/project with spaces/.handoff/CHECKPOINT.md"
+[[ ! -e "$temporary/project with spaces/.handoff" ]]
 [[ -L "$temporary/project with spaces/.claude/skills" ]]
 [[ -d "$temporary/project with spaces/.gemini/antigravity/skills" ]]
 [[ ! -e "$temporary/project with spaces/.git" ]]
@@ -88,7 +87,6 @@ printf '项目自己的 README\n' > "$temporary/empty/README.md"
 expect_status 0 run --no-symlink
 grep -q '^项目自己的 README$' "$temporary/empty/README.md"
 [[ -f "$temporary/empty/.claude/skills/README.md" && ! -L "$temporary/empty/.claude/skills" ]]
-grep -q '^- project_id: 未填' "$temporary/empty/.handoff/CONTEXT.md"
 # 已有 CI 不影响初始化，不能改写项目 CI 或引入模板 CI。
 mkdir -p "$temporary/github-existing/.github/workflows"
 printf '已有项目的 CI\n' > "$temporary/github-existing/.github/workflows/ci.yml"
@@ -104,11 +102,11 @@ expect_status 1 run
 grep -q '^已有项目的 PR 模板$' "$temporary/github-conflict/.github/PULL_REQUEST_TEMPLATE.md"
 [[ ! -e "$temporary/github-conflict/AGENTS.md" ]]
 # 不完整压缩包：不能留下部分项目文件。
-rm "$temporary/archive/template/HANDOFF.md"
+rm "$temporary/archive/template/PROMPTS.md"
 tar -czf "$temporary/incomplete.tar.gz" -C "$temporary/archive" template
 export TEST_ARCHIVE="$temporary/incomplete.tar.gz"
 mkdir "$temporary/incomplete-project"
 run() { (cd "$temporary/incomplete-project" && bash "$root/scripts/bootstrap.sh" "$@"); }
 expect_status 1 run
 [[ -z "$(ls -A "$temporary/incomplete-project")" ]]
-printf 'PASS：纯 Shell 初始化、空白记录、标识同步、软链/指针、预览、冲突、下载失败、版本选择、清理与无 Git/Node 依赖。\n'
+printf 'PASS：纯 Shell 初始化、标识同步、软链/指针、预览、冲突、下载失败、版本选择、清理与无 Git/Node 依赖。\n'

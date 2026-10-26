@@ -63,6 +63,6 @@ test -e .claude/skills && test -e .gemini/antigravity/skills && echo ok
 ## 与其他层的关系
 
 - 技能是步骤化操作建议，不是规则正文；与 [docs/AGENT-RULES.md](../docs/AGENT-RULES.md) 冲突时以规则为准。
-- 技能不扩大授权，不自动调度其他 Agent，也不替代 [HANDOFF.md](../HANDOFF.md) 的人工接管流程。
-- 现场与验证证据写 [.handoff/CHECKPOINT.md](../.handoff/CHECKPOINT.md)；长期有效的结论才进 [MEMORY.md](../MEMORY.md)。
+- 技能不扩大授权，也不自动调度其他 Agent。
+- 长期有效的结论才进 [MEMORY.md](../MEMORY.md)。
 - 局部作用域的 AGENTS.md 模板见 [adapters/scoped/MODULE-AGENTS.md](../adapters/scoped/MODULE-AGENTS.md)。

@@ -23,4 +23,3 @@
 - [开发流程](docs/DEVELOPMENT.md)
 - [规则入口](AGENTS.md)
 - [研发治理与任务契约](docs/AI-GOVERNANCE.md)
-- [人工接力协议](HANDOFF.md)
