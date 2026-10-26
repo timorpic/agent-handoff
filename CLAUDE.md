@@ -8,7 +8,7 @@
 
 按 AGENTS.md 核对 MEMORY、项目身份和实际文件，
 完成适用章节及相关文档读取后再修改。
-文档一致性自检：`sh scripts/check-docs.sh`（只读，检查死链、章节引用、技能前置元数据与跟踪状态）。
+修改文档后逐条核对：Markdown 相对链接可解析、章节引用与标题一致。
 
 技能：`.claude/skills` 指向根目录 `skills/`；需要时读取对应 SKILL.md，
 frontmatter 只说明何时使用，不预加载全部技能。

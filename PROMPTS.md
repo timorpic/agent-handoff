@@ -25,13 +25,13 @@ MEMORY、ADR、需求与实际实现，不自动继承其他项目结论。
 并实际读取一次，确认内容被加载；未加载时改用 adapters/ENTRY.md 显式提示。
 共享技能位于根目录 skills/，客户端私有目录只放相对链接，不复制 SKILL.md。
 只在确有模块级差异时建局部 AGENTS.md，同级 CLAUDE.md 指向它，不复制正文。
-接入后执行 `sh scripts/check-docs.sh`，核对死链、章节引用、技能前置元数据与链接解析。
+接入后逐条核对：入口 Markdown 链接可解析、章节引用与标题一致、
+`.claude/skills` 与 `.gemini/antigravity/skills` 指向根 skills/。
 客户端是否自动加载某文件属外部事实，请以实际结果为准，不要假定生效。
 
 ## 新建项目骨架
 
-请在目标目录执行 `node scripts/init.mjs --target <目录>`，
-先用 `--dry-run` 核对生成计划；需要模块作用域时追加 `--module <相对路径>`。
+请在目标目录执行 `bash scripts/bootstrap.sh`，先用 `--dry-run` 核对计划。
 生成后核对：入口只引用不复制规则正文、`.claude/skills` 与
 `.gemini/antigravity/skills` 解析到根 skills/。
 不要为初始化虚构任务事实、前任记录或测试结果。

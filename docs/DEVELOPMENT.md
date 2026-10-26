@@ -31,9 +31,8 @@
 ## GitHub Actions 与仓库设置
 
 目标项目自行设计和维护 GitHub Actions 工作流、检查命令、运行时、服务及必需检查名称。
-本模板不生成目标项目 workflow；分发 PR 模板、治理规则、`.ai/templates/task.json` 和
-`scripts/ai-check.mjs`。按 [研发治理](AI-GOVERNANCE.md) 将范围检查加入项目 CI，
-并补齐与项目类型相符的检查；不适用的测试或构建明确标为不适用；已有项目 CI 保持原样，模板自身 CI 不分发。
+本模板不生成目标项目 workflow，只分发 PR 模板与规则文档。
+按项目类型补齐适用的检查；不适用的测试或构建明确标为不适用；已有项目 CI 保持原样。
 构建与测试全部在 GitHub Actions 执行，本机只做允许的静态检查。
 
 初始化后按项目已有或自行建立的 CI 逐项核实并记录证据：
@@ -59,8 +58,8 @@
 - 规则入口唯一：根 AGENTS.md；客户端入口只引用，不复制正文。
 - 客户端映射与核实状态见 docs/MULTI-AGENT.md；规则边界见 docs/AGENT-RULES.md 第 19 节。
 - 共享工作流位于 skills/；新增技能按 skills/README.md 的规范，frontmatter `name` 必须等于目录名。
-- 局部作用域按 `--module` 或手工复制 adapters/scoped/MODULE-AGENTS.md 建立，不预建空目录。
-- 一致性自检：`sh scripts/check-docs.sh`；骨架生成：`node scripts/init.mjs --help`。
+- 局部作用域按手工复制 adapters/scoped/MODULE-AGENTS.md 建立，不预建空目录。
+- 初始化入口：`bash scripts/bootstrap.sh --dry-run` 预览，去掉 `--dry-run` 实际写入当前目录。
 
 ## 发布入口
 发布版本号及质量要求遵循 docs/AGENT-RULES.md 第 17 节，执行与回滚见 DEPLOYMENT.md。
@@ -68,10 +67,7 @@
 
 ## 研发治理与初始化验收
 
-新项目采用 [研发治理](AI-GOVERNANCE.md) 的任务契约与范围检查。
-初始化分发规则、检查器和契约样例，不分发 `.ai/tasks/` 下的维护历史，也不生成项目 workflow。
-每个项目必须在真实 PR 上核对缺失契约或越界变更能使独立范围检查失败，
-再按实际权限配置必需检查；仅生成文件不能宣称门禁已启用。
-模板仓库自身通过 `template-checks` 和 `task-scope` 验证分发行为及 PR 范围。
-本机可运行 `node --check scripts/ai-check.mjs`、`sh scripts/check-docs.sh` 和范围静态检查；
-新增回归仅由 GitHub Actions 执行。远程分支保护与四客户端行为验收仍待实际核实。
+任务的范围约定、证据分级与人工审核边界见 [研发治理](AI-GOVERNANCE.md)。
+初始化只分发规则文档与 PR 模板，不分发模板维护记录，也不生成项目 workflow。
+每个项目按实际权限配置必需检查，并在真实 PR 上核实生效；仅生成文件不能宣称门禁已启用。
+本机只运行允许的静态检查；测试与构建由 GitHub Actions 执行。远程分支保护与四客户端行为验收仍待实际核实。

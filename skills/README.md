@@ -57,7 +57,7 @@ test -e .claude/skills && test -e .gemini/antigravity/skills && echo ok
 - [ ] 前置读取只引用章节号（如详细规则第 5 节），不复制规则正文。
 - [ ] 步骤不要求授权之外的操作；涉及提交、推送、发版时先确认授权。
 - [ ] 两个客户端路径下 `test -e` 通过，`readlink` 输出与上表一致。
-- [ ] 在仓库根目录执行 `sh scripts/check-docs.sh`，没有因新增文件产生的错误。
+- [ ] 新增或修改技能后核对：frontmatter `name` 等于目录名、相对链接可解析、两个客户端链接仍指向根 `skills/`。
 - [ ] 需要时同步更新本文件的目录结构与项目文档导航。
 
 ## 与其他层的关系
