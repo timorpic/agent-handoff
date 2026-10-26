@@ -118,19 +118,19 @@ AGENTS.md 是精简启动入口；CLAUDE.md 和 adapters/ENTRY.md 是工具入�
 只需要 Bash、curl、tar 和常见系统工具（macOS、Linux 或 Windows Git Bash）；初始化不依赖 Git、Node.js。先进入项目文件夹，再下载并运行入口脚本：
 
 ~~~sh
-curl -fL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh -o /tmp/agent-handoff-bootstrap.sh
-bash /tmp/agent-handoff-bootstrap.sh
+curl -fL https://raw.githubusercontent.com/timorpic/ai-rules-template/HEAD/scripts/bootstrap.sh -o /tmp/ai-rules-template-bootstrap.sh
+bash /tmp/ai-rules-template-bootstrap.sh
 ~~~
 
 也可在项目文件夹内一键运行（执行仓库当前版本脚本）：
 
 ~~~sh
-curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/timorpic/ai-rules-template/HEAD/scripts/bootstrap.sh | bash
 ~~~
 
 可将脚本保存在自己的工具目录，以后进入项目文件夹直接运行即可。
 脚本始终初始化命令运行时的当前目录，不支持 `--target`，与脚本保存位置无关。
-固定从公开仓库 `timorpic/agent-handoff` 下载压缩包，默认分支为 main；`--ref <分支或Tag>` 可选择版本。
+固定从公开仓库 `timorpic/ai-rules-template` 下载压缩包，默认分支为 main；`--ref <分支或Tag>` 可选择版本。
 需要预览时加 `--dry-run`，不支持软链时加 `--no-symlink`。
 下载入口只负责当前目录的首次初始化；局部入口可按模板手工建立。
 可选 `--project-id <标识>` 会写入 MEMORY 的稳定 project_id；省略时保留未填写。

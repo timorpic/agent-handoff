@@ -1,4 +1,4 @@
-# Agent Handoff
+# AI Rules Template
 
 面向 AI 编程工具（Claude Code、Codex 等）的通用项目治理模板：
 统一规则入口、长期知识、共享技能库与研发治理规则，供新项目一键初始化。
@@ -13,7 +13,7 @@
 进入你的项目文件夹，运行：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/timorpic/ai-rules-template/HEAD/scripts/bootstrap.sh | bash
 ```
 
 需要 Bash、curl、tar 和常见系统工具，初始化不依赖 Git 或 Node.js。
@@ -23,9 +23,9 @@ curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts
 也可以先下载脚本，预览后初始化：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/timorpic/agent-handoff/HEAD/scripts/bootstrap.sh -o /tmp/agent-handoff-bootstrap.sh
-bash /tmp/agent-handoff-bootstrap.sh --dry-run
-bash /tmp/agent-handoff-bootstrap.sh
+curl -fsSL https://raw.githubusercontent.com/timorpic/ai-rules-template/HEAD/scripts/bootstrap.sh -o /tmp/ai-rules-template-bootstrap.sh
+bash /tmp/ai-rules-template-bootstrap.sh --dry-run
+bash /tmp/ai-rules-template-bootstrap.sh
 ```
 
 初始化后填写项目需求和说明，未知信息保留待填写。
@@ -51,7 +51,7 @@ bash /tmp/agent-handoff-bootstrap.sh
 ### 新项目：首次初始化
 
 ```text
-请使用 https://github.com/timorpic/agent-handoff，为当前新项目完成首次初始化。
+请使用 https://github.com/timorpic/ai-rules-template，为当前新项目完成首次初始化。
 
 先确认当前项目根目录和已有文件，读取适用的上层及本地规则。
 将模板下载到临时目录，核对后初始化当前项目。
@@ -70,7 +70,7 @@ bash /tmp/agent-handoff-bootstrap.sh
 ### 现有项目：核对并合并规则
 
 ```text
-请参考 https://github.com/timorpic/agent-handoff，检查并补齐当前项目的统一规则入口、共享技能与研发治理。
+请参考 https://github.com/timorpic/ai-rules-template，检查并补齐当前项目的统一规则入口、共享技能与研发治理。
 
 先确认当前项目根目录，读取适用规则、长期记忆和相关文档，检查 Git 修改状态。
 将参考模板下载到临时目录，先对照现有实现，再做最小必要改动，不整套覆盖或重新初始化。

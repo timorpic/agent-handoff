@@ -42,7 +42,7 @@ for tool in curl tar mktemp mkdir cp rm find awk grep ln dirname cat; do
   command -v "$tool" >/dev/null 2>&1 || fail "缺少系统工具：$tool"
 done
 target=$(pwd -P)
-temporary=$(mktemp -d "${TMPDIR:-/tmp}/agent-handoff-download.XXXXXXXX") || fail '无法创建临时目录。'
+temporary=$(mktemp -d "${TMPDIR:-/tmp}/ai-rules-template-download.XXXXXXXX") || fail '无法创建临时目录。'
 cleanup() { rm -rf -- "$temporary"; }
 trap cleanup EXIT
 trap 'exit 130' INT
@@ -52,7 +52,7 @@ stage="$temporary/stage"
 mkdir -p "$source_dir" "$stage"
 printf '正在下载模板（%s）……\n' "$ref"
 curl --proto '=https' --tlsv1.2 -fL --retry 2 --connect-timeout 15 --max-time 180 \
-  "https://codeload.github.com/timorpic/agent-handoff/tar.gz/$ref" -o "$temporary/template.tar.gz" \
+  "https://codeload.github.com/timorpic/ai-rules-template/tar.gz/$ref" -o "$temporary/template.tar.gz" \
   || fail '模板下载失败；未修改项目文件。'
 # 在解压前拒绝绝对路径、路径穿越和控制字符。
 tar -tzf "$temporary/template.tar.gz" > "$temporary/archive-list" || fail '模板压缩包损坏。'
