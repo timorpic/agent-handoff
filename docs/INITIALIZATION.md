@@ -6,7 +6,7 @@
 提供统一规则入口、长期知识、共享技能库与研发治理规则。新项目用它获得一致的
 工作规则与检查工具，不携带模板自身的历史，也不包含自动调度或跨工具并发能力。
 
-- 核心能力：Agent 行为边界、统一规则入口、长期知识、共享工作流、任务契约与 PR 范围检查。
+- 核心能力：Agent 行为边界、统一规则入口、长期知识、共享工作流与范围约定。
 - 当前非目标：任务接力（跨工具交接协议、活动任务上下文、检查点）、跨工具并发编排、
   任务分发、自动探测额度或自动切换工具。
 
@@ -31,8 +31,7 @@
 ├── PROMPTS.md                 # 初始化与接入提示                 [协议层·跟踪,禁改]
 ├── .gitignore                 # 平台缓存忽略规则                 [项目层·跟踪]
 ├── .github/
-│   ├── PULL_REQUEST_TEMPLATE.md # PR 描述与验证记录               [项目层·跟踪]
-│   └── workflows/template-ci.yml # 模板自身检查；不分发           [仅模板仓库]
+│   └── PULL_REQUEST_TEMPLATE.md # PR 描述与验证记录               [项目层·跟踪]
 ├── skills/                    # 跨客户端共享技能库（标准位置）   [项目层·跟踪]
 │   ├── README.md              # 技能规范与新增检查清单
 │   ├── code-review/SKILL.md   # 通用代码审查工作流
@@ -48,15 +47,12 @@
 │   ├── ENTRY.md               # 无原生 AGENTS.md 机制时按需复制   [入口层·跟踪,可适配]
 │   └── scoped/MODULE-AGENTS.md  # 局部作用域 AGENTS.md 模板
 ├── scripts/
-│   ├── check-docs.sh          # 只读一致性自检                   [项目层·跟踪]
-│   ├── bootstrap.sh           # 下载模板并初始化（模板专用）
-│   ├── init.mjs               # 零依赖骨架生成器                 [项目层·跟踪]
-│   └── init.test.mjs          # 生成器回归自测（仅模板仓库需要） [项目层·跟踪]
+│   └── bootstrap.sh           # 下载模板并初始化（模板专用）
 └── docs/
     ├── INITIALIZATION.md      # 本文件；不复制到目标项目         [仅模板仓库]
     ├── MULTI-AGENT.md         # 客户端映射、作用域与避坑         [项目层·跟踪]
     ├── AGENT-RULES.md         # 开发、记忆与 Release 规则        [协议层·跟踪,禁改]
-    ├── AI-GOVERNANCE.md       # 研发治理、任务契约与范围检查     [项目层·跟踪]
+    ├── AI-GOVERNANCE.md       # 研发治理、行为边界与范围约定     [项目层·跟踪]
     ├── PROJECT-SPEC.md        # 产品目标、范围与验收             [项目层·跟踪]
     ├── ARCHITECTURE.md        # 系统架构与模块边界               [项目层·跟踪]
     ├── DEVELOPMENT.md         # 环境、开发与验证流程＋项目专属规则 [项目层·跟踪]
@@ -67,7 +63,7 @@
 
 以上为模板实际包含的文件。docs/decisions/ 与 docs/runbooks/ 按需建立，
 不预先加入空目录或虚构项目内容（见下文“按需增加的文档”）。
-`src/` 下的模块级 AGENTS.md 只在确有模块差异时用 `--module` 生成，不预建。
+`src/` 下的模块级 AGENTS.md 只在确有模块差异时手工建立，不预建。
 跟踪策略见下文“模板文件的 Git 跟踪策略”。
 
 ## 文件职责
@@ -80,17 +76,13 @@
 | CLAUDE.md / adapters/ENTRY.md | 工具入口，引用统一规则（允许按项目适配） |
 | docs/MULTI-AGENT.md | 客户端入口映射、分层作用域、技能共享与跨平台避坑 |
 | skills/<name>/SKILL.md | 可复用工作流（前置元数据＋步骤＋验证要求），按需读取 |
-| scripts/bootstrap.sh | 下载模板并初始化；`bash scripts/bootstrap.test.sh` 验证下载入口 |
-| scripts/init.mjs | 零依赖骨架生成器：复制模板并建立链接或回退形态 |
+| scripts/bootstrap.sh | 下载模板并初始化；始终作用于运行命令时的当前目录 |
 | .github/PULL_REQUEST_TEMPLATE.md | PR 的问题、行为、验证、兼容性与审查记录 |
-| .github/workflows/template-ci.yml | 仅模板仓库运行文档与维护回归；不分发到目标项目 |
-| scripts/init.test.mjs | 生成器的端到端回归自测：`node scripts/init.test.mjs`，退出码 0 表示全部通过 |
-| scripts/check-docs.sh | 只读一致性自检：死链、章节引用、技能元数据、链接解析 |
 | MEMORY.md | 当前有效的长期知识及决策索引 |
 | DESIGN.md | 有 UI 的项目采用的视觉与交互规范 |
 | CHANGELOG.md | 面向使用者的版本变更和升级说明 |
 | TODO.md / 既有 Issue 系统 | 任务计划、依赖及计划状态 |
-| docs/AI-GOVERNANCE.md | 研发治理：任务契约、范围检查与人工审核边界 |
+| docs/AI-GOVERNANCE.md | 研发治理：行为边界、证据分级与范围约定 |
 | docs/PROJECT-SPEC.md | 产品目标、范围、需求与验收 |
 | docs/ARCHITECTURE.md | 当前系统架构、模块职责及数据流 |
 | docs/DEVELOPMENT.md | 开发环境、验证及贡献流程 |
@@ -142,28 +134,13 @@ curl -fsSL https://raw.githubusercontent.com/timorpic/ai-rules-template/HEAD/scr
 模板仓库 README.md 不分发。此入口不提供覆盖开关，其余同名文件应人工核对并合并。
 下载失败或发现冲突时不写入项目；写入期间的磁盘错误可能留下部分文件，需核对后重试。
 初始化期间不要让其他工具同时写入该目录。
-初始化只复制文件；后续如使用 `init.mjs`，该工具需要 Node.js。
+初始化只复制文件，不安装依赖、不生成项目 CI。
 远程模板将作为代码执行，只使用信任的仓库和版本。
 
 ### 已有本地模板
 
-本地生成器同样保留已有 README.md；缺失时从 README.project.md 生成空白项目说明，
-不复制模板介绍。即使指定 `--force`，也保留已有的普通 README.md 文件。
-
-
-一键生成：
-
-~~~bash
-node scripts/init.mjs --target ../my_project --dry-run   # 先看计划
-node scripts/init.mjs --target ../my_project             # 实际生成
-node scripts/init.mjs --target ../my_project --module src/api --module src/persistence
-~~~
-
-脚本行为：复制项目层与协议层文件、建立 `.claude/skills` 与 `.gemini/antigravity/skills`
-的相对软链、清理指向 `docs/INITIALIZATION.md` 的模板专属引用；默认不覆盖已存在文件，
-冲突时列出清单并以退出码 1 结束，`--force` 才覆盖。
-不支持符号链接的环境加 `--no-symlink`，回退为目录加 README.md 指针。
-生成器的回归自测：`node scripts/init.test.mjs`（模板仓库内执行，退出码 0 表示通过）。
+直接在模板仓库根目录运行同一脚本即可：`bash scripts/bootstrap.sh --dry-run` 预览，
+去掉 `--dry-run` 写入当前目录。保存为本地副本时同样作用于运行目录。
 
 手工步骤：
 
@@ -185,25 +162,20 @@ node scripts/init.mjs --target ../my_project --module src/api --module src/persi
    完成后按下方“新克隆自检”确认没有死链。
 8. 核对共享技能：`skills/` 与根目录同级，`.claude/skills`、`.gemini/antigravity/skills`
    应解析到它；`skills/*/SKILL.md` 的 frontmatter `name` 必须等于目录名。
-9. 只在确有模块级差异时创建局部作用域：`--module <相对路径>` 或手工复制
-   adapters/scoped/MODULE-AGENTS.md，不预建空目录。
-10. 执行 `sh scripts/check-docs.sh`，退出码应为 0；在目标项目中它会自动识别为
-   「非模板布局」，不再要求存在模板专属文件。
-11. 按 [开发流程](DEVELOPMENT.md)核对目标项目自行维护的 CI、主分支保护、
+9. 只在确有模块级差异时创建局部作用域：手工复制 adapters/scoped/MODULE-AGENTS.md，
+   不预建空目录。
+10. 按 [开发流程](DEVELOPMENT.md)核对目标项目自行维护的 CI、主分支保护、
     审批人数及 Squash merge，并在实际 PR 中核实；文件分发不会自动修改远程设置。
 
 ### 统一 Git 标准与 CI 边界
 
 所有新项目继承 docs/AGENT-RULES.md 第 9 节；项目差异只写 docs/DEVELOPMENT.md。
-两个初始化入口只按固定清单分发 `.github/PULL_REQUEST_TEMPLATE.md`，
+初始化入口只按固定清单分发 `.github/PULL_REQUEST_TEMPLATE.md`，
 不复制 `.github/workflows/`，不提供 CI 示例或项目检查入口，也不改写已有项目 CI。
 遇到已有 PR 模板时默认停止，人工核对合并；已有 workflow 不构成初始化冲突。
 
-`.github/workflows/template-ci.yml` 仅服务于本模板仓库，检查 PR 标题、文档一致性，
-并在 GitHub Actions 执行生成器和 Shell 初始化回归；它和维护测试均不分发。
 目标项目的 CI 由目标项目自行维护，实际检查名称与保护要求按其工作流核对。
-不能把模板维护回归当作业务项目的验收。本机只运行允许的静态检查，
-测试与构建全部在 GitHub Actions 执行。
+本机只运行允许的静态检查，测试与构建全部在 GitHub Actions 执行。
 
 本模板维护时保持 MEMORY 为空白分发模板；维护过程不写入分发的空白模板。
 
@@ -237,7 +209,7 @@ CLAUDE.md、adapters/ENTRY.md
 
 adapters/ENTRY.md 是按需文件：只有目标工具既无原生入口又不支持 AGENTS.md 时才需要复制，
 其余项目不必创建。文件树中列出它是为了说明模板提供的形态，不代表每个项目都要装。
-adapters/scoped/MODULE-AGENTS.md 只是局部作用域模板，供 `--module` 或手工复制使用。
+adapters/scoped/MODULE-AGENTS.md 只是局部作用域模板，供手工复制使用。
 
 ### 共享技能与客户端配置：跟踪
 
@@ -269,9 +241,8 @@ docs/INITIALIZATION.md（本文件）不复制到目标项目：它说明的是�
 
 README.md、AGENTS.md、MEMORY.md、TODO.md、DESIGN.md、CHANGELOG.md、
 docs/PROJECT-SPEC.md、docs/ARCHITECTURE.md、docs/DEVELOPMENT.md、docs/DEPLOYMENT.md、
-docs/MULTI-AGENT.md、docs/AI-GOVERNANCE.md、scripts/check-docs.sh、scripts/init.mjs、
-.github/PULL_REQUEST_TEMPLATE.md。
-模板仓库自身的 `.github/workflows/template-ci.yml` 也须跟踪，但不分发给目标项目。
+docs/MULTI-AGENT.md、docs/AI-GOVERNANCE.md、.github/PULL_REQUEST_TEMPLATE.md、
+scripts/bootstrap.sh。
 
 `MEMORY.md` 记录 DEC / LES 长期条目，不跟踪会导致新克隆丢失全部积累，必须纳入。
 
@@ -285,7 +256,7 @@ docs/MULTI-AGENT.md、docs/AI-GOVERNANCE.md、scripts/check-docs.sh、scripts/in
 - 逐项核对：本地文件仍存在且内容未变、`git ls-files` 中无该路径、`git check-ignore -v` 忽略生效。
 - 非 Git 项目先备好根目录 `.gitignore`，执行 `git init` 后补验。
 - **新克隆自检**：克隆到临时目录，确认工具入口、docs/AGENT-RULES.md、
-  skills/ 与 scripts/check-docs.sh 均存在，并逐条检查 AGENTS.md 的项目层与协议层链接可解析；
+  skills/ 与 scripts/bootstrap.sh 均存在，并逐条检查 AGENTS.md 的项目层与协议层链接可解析；
   入口层、README、docs/MULTI-AGENT.md 的链接也一并核对。
 - **技能链接自检**：确认 `.claude/skills` 与 `.gemini/antigravity/skills` 在克隆中仍是符号链接
   （`test -L`）且 `readlink` 分别为 `../skills` 与 `../../skills`；若被检出为普通文本文件，
@@ -299,11 +270,9 @@ docs/MULTI-AGENT.md、docs/AI-GOVERNANCE.md、scripts/check-docs.sh、scripts/in
 - 协议版本使用模板仓库的 commit SHA，不另造编号。
 - 在项目 MEMORY.md 记录：协议版本 SHA 与安装日期。
 - AGENTS.md 顶部写同一 SHA。
-- 升级＝整体覆盖协议层 2 个文件＋更新 SHA，随后核对章节引用仍可解析；推荐直接执行
-  `sh scripts/check-docs.sh`（只读，覆盖死链、章节引用、技能前置元数据、
-  技能链接解析、settings.json 合法性与忽略规则）。
-  手工等价命令：
-  `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md CLAUDE.md PROMPTS.md MEMORY.md docs/*.md | sort -u`
+- 升级＝整体覆盖协议层 2 个文件＋更新 SHA，随后核对章节引用仍可解析。手工核对命令：
+  `grep -rhoE '第 [0-9]+(\.[0-9]+)? 节' AGENTS.md CLAUDE.md PROMPTS.md MEMORY.md docs/*.md | sort -u`，
+  逐条确认引用的章节标题在对应文件中存在。
 - 修改协议层 2 个文件时，须同步整体更新本文件，并最后提交，使新的协议版本 SHA 是包含这两者的提交。
 - 协议层 2 个文件（PROMPTS.md、docs/AGENT-RULES.md）在项目中应逐字节等于
   所标注 SHA 的模板版本；有差异即为待核实的私改。入口层（CLAUDE.md、adapters/ENTRY.md）
@@ -357,12 +326,10 @@ MEMORY 只摘录长期约束并链接主记录，不复制完整架构、设计�
 
 ## 新项目默认分发研发治理
 
-Node 生成器与 Shell 一键初始化都复制 `docs/AI-GOVERNANCE.md`、
-`scripts/ai-check.mjs` 和 `.ai/templates/task.json`，AGENTS.md 提供统一读取入口。
-`.ai/tasks/` 是每个项目自己的任务契约历史，不从模板复制；首次实际任务按样例建立契约。
-`MEMORY.md` 分发模板继续保持空白，不写入模板维护记录。
+Shell 一键初始化复制 `docs/AI-GOVERNANCE.md` 与 `.github/PULL_REQUEST_TEMPLATE.md`，
+AGENTS.md 提供统一读取入口。`MEMORY.md` 分发模板继续保持空白，不写入模板维护记录。
 
-初始化后按 [研发治理](AI-GOVERNANCE.md) 接入项目自己的 PR 范围检查和质量验证，
-核实主分支保护与四客户端规则读取情况。模板 CI 及其测试不会复制进业务项目，
+初始化后按 [研发治理](AI-GOVERNANCE.md) 写明任务目标、允许改动的路径与验收条件，
+接入项目自己的质量检查，核实主分支保护与四客户端规则读取情况。
 未接入、未运行或平台不支持的门禁必须如实标记。此分发策略适用于以后初始化的新项目，
 不自动迁移已有项目，也不修改其他仓库配置。

@@ -1,8 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(sh scripts/check-docs.sh:*)",
-      "Bash(node scripts/init.mjs --dry-run:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",

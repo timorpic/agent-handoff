@@ -9,7 +9,7 @@
 
 模板不预设业务、技术栈或部署平台，不携带具体项目的历史，也不包含自动调度或跨工具并发能力。
 
-新项目默认获得行为治理规则、任务契约样例与 Git Diff 范围检查器，见 [研发治理](docs/AI-GOVERNANCE.md)。
+新项目默认获得行为治理规则与 PR 模板，见 [研发治理](docs/AI-GOVERNANCE.md)。
 初始化不导入本模板的任务历史；CI 检查命令和主分支保护由新项目按实际情况接入，不批量更新现有项目。
 
 ## 一键初始化
@@ -41,9 +41,8 @@ bash /tmp/ai-rules-template-bootstrap.sh
 - 长期知识：[MEMORY.md](MEMORY.md) 记录项目长期事实与已确认决策。
 - 共享技能库：根目录 [skills/](skills/README.md) 提供代码审查、重构、发版等工作流，
   供各客户端按需读取。
-- 研发治理：任务契约与 PR 范围检查，见 [docs/AI-GOVERNANCE.md](docs/AI-GOVERNANCE.md)。
-- 初始化工具：`scripts/bootstrap.sh`（纯 Shell）与 `scripts/init.mjs`（零依赖 Node 生成器），
-  以及只读一致性自检 `scripts/check-docs.sh`。
+- 研发治理：Agent 行为边界、证据分级与范围约定，见 [docs/AI-GOVERNANCE.md](docs/AI-GOVERNANCE.md)。
+- 初始化入口：`scripts/bootstrap.sh`（纯 Shell，无 Node 与 Git 依赖）。
 
 ## 通过 Agent 接入
 
