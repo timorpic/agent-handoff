@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "task_id": "handoff-capability-removal-20261026",
+  "goal": "按用户要求彻底移除本模板仓库的跨工具任务接力能力，包括接力协议正文、助手脚本与测试、现场层目录及其在入口、规则、技能、适配器、初始化脚本与 CI 中的全部引用，同时保留统一规则入口、长期知识、共享技能、研发治理与初始化分发能力",
+  "allowed_paths": [
+    ".ai/tasks/handoff-capability-removal-20261026.json",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "README.project.md",
+    "MEMORY.md",
+    "PROMPTS.md",
+    "TODO.md",
+    ".gitignore",
+    ".claude/settings.json",
+    ".github/workflows/template-ci.yml",
+    "adapters/**",
+    "docs/**",
+    "scripts/**",
+    "skills/**",
+    "HANDOFF.md",
+    ".handoff/**"
+  ],
+  "forbidden_paths": [
+    ".ai/tasks/handoff-dirty-records.json",
+    ".ai/tasks/engineering-governance.json",
+    ".ai/tasks/governance-diff-boundaries.json",
+    ".ai/tasks/governance-distribution.json",
+    ".ai/tasks/gitflow-policy-20261024.json",
+    ".ai/tasks/pi-runtime-removal-20261024.json",
+    ".ai/tasks/project-type-workflow-20261024.json",
+    ".ai/templates/**",
+    "scripts/ai-check.mjs",
+    "scripts/ai-check.test.mjs",
+    ".env",
+    ".env.local",
+    "data/**"
+  ],
+  "constraints": {
+    "allow_new_dependencies": false,
+    "allow_database_changes": false,
+    "allow_api_breaking_changes": true,
+    "allow_unrelated_refactor": false
+  },
+  "acceptance": [
+    "HANDOFF.md、docs/HANDOFF-HELPER.md、scripts/handoff.mjs、scripts/handoff.test.mjs 与 .handoff/ 目录不再存在",
+    "入口、规则、技能、适配器、PROMPTS 与 MEMORY 中不再引用接力协议、现场层或 handoff 助手",
+    "docs/AGENT-RULES.md 删除第 18 节，第 19 节编号保持不变，全仓库「第 N 节」引用仍可解析",
+    "scripts/init.mjs 不再生成现场层文件或接受 --project-id；scripts/check-docs.sh 不再检查认领状态、现场层跟踪与 draft",
+    "scripts/bootstrap.sh 分发清单与 bootstrap.test.sh、init.test.mjs 断言同步更新且不再涉及接力文件",
+    "template-ci.yml 不再运行 handoff 助手测试；.claude/settings.json 与 .gitignore 无 handoff 相关规则",
+    "sh scripts/check-docs.sh 退出码为 0；node scripts/init.mjs --dry-run 通过；脚本语法静态检查通过",
+    "全仓库 handoff/接力/交接 检索仅剩仓库 URL、防回归断言与历史任务契约等白名单项",
+    "不执行本机构建或测试，回归交给 GitHub Actions"
+  ]
+}
