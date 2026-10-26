@@ -3,15 +3,14 @@
 //
 // 用途：
 //   把本模板仓库的协议层与项目层文件复制到目标项目；为两个客户端建立指向根目录 skills/ 的
-//   相对软链（不支持软链时回退为「目录 + README.md 指针」）；生成空白 draft 的现场层文件；
+//   相对软链（不支持软链时回退为「目录 + README.md 指针」）；
 //   按 --module 追加局部作用域入口（AGENTS.md + 同级 CLAUDE.md）。
 //
 // 用法：
-//   node scripts/init.mjs [--target <dir>] [--project-id <id>] [--module <相对路径>]...
+//   node scripts/init.mjs [--target <dir>] [--module <相对路径>]...
 //                         [--no-symlink] [--force] [--dry-run] [--help]
 //
 //   --target <dir>        目标目录，默认当前工作目录；不存在时创建。
-//   --project-id <id>     写入现场层 project_id；不给则保持模板原文（不写空值）。
 //   --module <相对路径>   追加一个局部作用域，可重复；路径相对目标目录，不得越出目标。
 //   --no-symlink          不创建软链，直接使用「目录 + README.md 指针」回退形态。
 //   --force               覆盖已存在的同名文件（覆盖前先打印将覆盖的路径清单）。
@@ -21,7 +20,7 @@
 // 退出码：
 //   0  生成成功，或 --dry-run 干跑成功，或 --help
 //   1  存在冲突（未加 --force）或执行失败
-//   2  用法错误（未知选项、缺参数、非法 project_id、越出目标目录的 --module 路径）
+//   2  用法错误（未知选项、缺参数、越出目标目录的 --module 路径）
 //
 // 约束：
 //   零依赖，只用 Node 内置模块（node:fs/promises、node:path、node:url、node:process），node >= 18。
@@ -64,7 +63,6 @@ const ROOT_FILES = [
   'CLAUDE.md',
   'README.md',
   'MEMORY.md',
-  'HANDOFF.md',
   'PROMPTS.md',
   'DESIGN.md',
   'CHANGELOG.md',
@@ -76,10 +74,7 @@ const ROOT_FILES = [
 const WALK_DIRS = ['adapters', 'docs', 'skills'];
 
 // 其它固定复制项（scripts/init.mjs 一并复制：目标项目里要能执行 --module 追加）
-const EXTRA_FILES = ['scripts/check-docs.sh', 'scripts/init.mjs', 'scripts/handoff.mjs', 'scripts/ai-check.mjs', '.ai/templates/task.json', '.github/PULL_REQUEST_TEMPLATE.md', '.claude/settings.json'];
-
-// 现场层：从空白模板复制后仅替换 project_id，status 保持 draft
-const HANDOFF_TEMPLATES = ['.handoff/CONTEXT.md', '.handoff/CHECKPOINT.md'];
+const EXTRA_FILES = ['scripts/check-docs.sh', 'scripts/init.mjs', 'scripts/ai-check.mjs', '.ai/templates/task.json', '.github/PULL_REQUEST_TEMPLATE.md', '.claude/settings.json'];
 
 // 局部作用域模板
 const MODULE_TEMPLATE = 'adapters/scoped/MODULE-AGENTS.md';
@@ -104,7 +99,6 @@ const HELP_TEXT = [
   '',
   '选项：',
   '  --target <dir>       目标目录（默认当前工作目录；不存在时创建）',
-  '  --project-id <id>    写入 .handoff 的 project_id；不给则保持模板原文「未填」',
   '  --module <相对路径>  追加局部作用域入口，可重复（如 --module src/api）',
   '  --no-symlink         不建软链，直接写「目录 + README.md 指针」回退形态',
   '  --force              覆盖已存在文件；覆盖前先打印将覆盖的路径清单',
@@ -117,16 +111,15 @@ const HELP_TEXT = [
   '  重复执行不加 --force 会按「不覆盖」规则列出冲突并以退出码 1 结束（属预期保护）。',
   '',
   '行为：',
-  '  1. 复制协议层与项目层文件（AGENTS.md、CLAUDE.md、README.md、MEMORY.md、HANDOFF.md、',
-  '     PROMPTS.md、DESIGN.md、CHANGELOG.md、TODO.md、.gitignore、adapters/**、docs/**、',
-  '     skills/**、scripts/check-docs.sh、scripts/init.mjs、scripts/handoff.mjs、',
-  '     scripts/ai-check.mjs、.ai/templates/task.json、.github/PULL_REQUEST_TEMPLATE.md、.claude/settings.json）。',
-  '  2. 不复制 .git/、.ai/tasks/ 的维护历史、.handoff 的已有内容、模板专属说明及模板 CI。',
+  '  1. 复制协议层与项目层文件（AGENTS.md、CLAUDE.md、README.md、MEMORY.md、PROMPTS.md、',
+  '     DESIGN.md、CHANGELOG.md、TODO.md、.gitignore、adapters/**、docs/**、skills/**、',
+  '     scripts/check-docs.sh、scripts/init.mjs、scripts/ai-check.mjs、',
+  '     .ai/templates/task.json、.github/PULL_REQUEST_TEMPLATE.md、.claude/settings.json）。',
+  '  2. 不复制 .git/、.ai/tasks/ 的维护历史、模板专属说明及模板 CI。',
   '  3. 对 AGENTS.md、README.md 去掉只属于模板仓库的引用（目标项目里不该出现该文件名）。',
-  '  4. 生成空白 draft 的 .handoff/CONTEXT.md 与 .handoff/CHECKPOINT.md。',
-  '  5. 建立 .claude/skills -> ../skills、.gemini/antigravity/skills -> ../../skills。',
-  '  6. --module 生成 <dir>/AGENTS.md 与指向它的同级 CLAUDE.md。',
-  '  7. 默认不覆盖已存在文件：列出冲突并以退出码 1 结束。',
+  '  4. 建立 .claude/skills -> ../skills、.gemini/antigravity/skills -> ../../skills。',
+  '  5. --module 生成 <dir>/AGENTS.md 与指向它的同级 CLAUDE.md。',
+  '  6. 默认不覆盖已存在文件：列出冲突并以退出码 1 结束。',
   '',
   '退出码：0 成功或干跑；1 冲突或失败；2 用法错误。',
 ].join('\n');
@@ -137,7 +130,6 @@ const HELP_TEXT = [
 function parseArgs(argv) {
   const options = {
     target: null,
-    projectId: null,
     modules: [],
     noSymlink: false,
     force: false,
@@ -164,13 +156,6 @@ function parseArgs(argv) {
       case '--target':
         options.target = takeValue('--target');
         if (options.target.trim() === '') throw new UsageError('--target 不能为空');
-        break;
-      case '--project-id':
-        options.projectId = takeValue('--project-id').trim();
-        if (options.projectId === '') throw new UsageError('--project-id 不能为空');
-        if (/[\s\u0000-\u001f]/.test(options.projectId)) {
-          throw new UsageError('--project-id 不能包含空白或控制字符');
-        }
         break;
       case '--module':
         options.modules.push(takeValue('--module'));
@@ -236,19 +221,10 @@ function transformTemplateRefs(relPath, text) {
   }
 
   if (relPath === 'README.md') {
-    const replacement = '> 跨工具接力与客户端接入见 [客户端接入](docs/MULTI-AGENT.md)，'
-      + '人工接力见 [人工接力协议](HANDOFF.md)。';
     const output = [];
     for (let index = 0; index < inputLines.length; index += 1) {
       const line = inputLines[index];
       const trimmed = line.trim();
-
-      // 顶部说明行：整行替换为中立的项目内说明
-      if (trimmed.startsWith('> 模板初始化与人工接力使用方法见')) {
-        output.push(replacement);
-        changes.push('README.md：原第 ' + (index + 1) + ' 行的模板初始化说明替换为项目中立说明');
-        continue;
-      }
 
       // 「文档入口」首项：整行删除，并连带删掉紧随其后的空行（保持列表紧凑）
       if (trimmed.startsWith('- [模板文件树与初始化说明]')) {
@@ -274,19 +250,6 @@ function transformTemplateRefs(relPath, text) {
   }
 
   return { content: text, changes, degraded };
-}
-
-// 现场层模板：只在给了 --project-id 时替换 project_id 的值；不给则保持原文（不写空字符串）
-function fillProjectId(text, projectId) {
-  if (!projectId) return { content: text, changed: false };
-  const lines = text.split('\n');
-  for (let index = 0; index < lines.length; index += 1) {
-    if (/^- project_id:/.test(lines[index])) {
-      lines[index] = '- project_id: ' + projectId;
-      return { content: lines.join('\n'), changed: true };
-    }
-  }
-  return { content: text, changed: false };
 }
 
 // 局部作用域模板：替换占位符，并按模块实际深度改写指向规则正文的相对链接。
@@ -491,36 +454,6 @@ async function collectCopyEntries(relDir, ctx) {
   }
 }
 
-// 现场层：读空白模板，只替换 project_id，status 保持 draft
-async function planHandoffFiles(ctx, options) {
-  for (const rel of HANDOFF_TEMPLATES) {
-    const sourceAbs = path.join(SOURCE_ROOT, rel);
-    const info = await lstatSafe(sourceAbs);
-    if (!info || !info.isFile()) {
-      ctx.missingSources.push({ rel, reason: '空白模板暂缺（可能正在并行编辑）' });
-      continue;
-    }
-    const raw = await readFile(sourceAbs, 'utf8');
-    const filled = fillProjectId(raw, options.projectId);
-    if (filled.changed) {
-      ctx.notes.push(rel + '：project_id 已写入 ' + options.projectId);
-    } else {
-      ctx.notes.push(rel + '：未指定 --project-id，project_id 保持模板原文');
-    }
-    if (!/^- status: draft$/m.test(filled.content)) {
-      ctx.notes.push('警告：' + rel + ' 的 status 不是 draft，请核对源模板（本脚本不改写状态）');
-    }
-    ctx.entries.push({
-      kind: 'generate',
-      rel,
-      sourceAbs,
-      content: filled.content,
-      origin: rel + ' 空白模板',
-    });
-    ctx.handoffFiles.push(rel);
-  }
-}
-
 // 两个客户端技能位置：软链，或（--no-symlink）回退目录
 async function planSkillLinks(ctx, options) {
   const hasSkills = await pathExists(path.join(SOURCE_ROOT, 'skills'));
@@ -618,7 +551,6 @@ async function plan(options) {
     missingSources: [],
     transformChanges: [],
     notes: [],
-    handoffFiles: [],
     fatalMissing: false,
   };
 
@@ -637,7 +569,6 @@ async function plan(options) {
   for (const rel of EXTRA_FILES) {
     await addCopyEntry(rel, null, ctx);
   }
-  await planHandoffFiles(ctx, options);
   await planSkillLinks(ctx, options);
   await planModules(ctx, options);
 
@@ -653,7 +584,6 @@ async function plan(options) {
     missingSources: ctx.missingSources,
     transformChanges: ctx.transformChanges,
     notes: ctx.notes,
-    handoffFiles: ctx.handoffFiles,
     fatalMissing: ctx.fatalMissing,
   };
 }
@@ -966,20 +896,8 @@ async function verifyResult(planObject, results) {
     }
   }
 
-  for (const rel of planObject.handoffFiles) {
-    if (!written.has(rel)) continue;
-    const abs = path.join(planObject.targetDir, rel);
-    const text = await readFile(abs, 'utf8').catch(() => null);
-    if (text === null) {
-      problems.push(rel + '：写入后读取失败');
-    } else if (!/^- status: draft$/m.test(text)) {
-      problems.push(rel + '：status 不是 draft');
-    }
-  }
-
   return problems;
 }
-
 // ---------- 输出 ----------
 
 function describeEntry(entry) {
@@ -1090,8 +1008,7 @@ function printSummary(planObject, results, problems) {
   console.log('核对提示（本脚本不写文件，仅提示）：');
   console.log('1. 入口只引用不复制：AGENTS.md 是唯一规则入口，CLAUDE.md 与局部 CLAUDE.md 只做指向，不复制规则正文。');
   console.log('2. 共享技能：技能正文只在根目录 skills/；两个客户端目录的创建结果见上（软链或回退指针）。');
-  console.log('3. 现场层：.handoff/CONTEXT.md 与 .handoff/CHECKPOINT.md 保持空白 draft，未写入任何虚构任务事实。');
-  console.log('4. 未复制：.git/ 与模板专属初始化说明；生成物不保留指向该文件的 Markdown 链接。');
+  console.log('3. 未复制：.git/ 与模板专属初始化说明；生成物不保留指向该文件的 Markdown 链接。');
 
   if (problems.length > 0) {
     console.log('');

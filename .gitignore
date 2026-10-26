@@ -1,18 +1,3 @@
-# 现场层：不跟踪，每次会话重写
-# 活动记录、备份与临时文件仅供当前工作区使用；正式归档另行跟踪。
-/.handoff/CONTEXT.md
-/.handoff/CHECKPOINT.md
-/.handoff/*.previous.md
-/.handoff/*.previous
-/.handoff/*.tmp.md
-
-# 本模板仓库的例外：空白 CONTEXT/CHECKPOINT 作为分发模板保留跟踪，
-# 这样下载模板时才能取得这两份空白文件。
-# 忽略规则只作用于未跟踪文件，不影响两者的跟踪状态；
-# 脚本生成的新项目文件尚未被跟踪，上述规则直接生效。
-# 只有已被 Git 跟踪的活动记录才需执行 git rm --cached（保留本地文件）。
-# .handoff/archive/ 属冻结历史证据，必须跟踪，不在此忽略。
-
 # 平台专属临时缓存：不进 Git
 # 规则来源：客户端约定（.claude / .gemini）与本仓库 skills/ 共享技能库设计；
 # 只忽略各平台的会话缓存，不忽略技能正文（skills/ 与两个软链必须跟踪）。

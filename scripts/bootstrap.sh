@@ -6,7 +6,7 @@ usage() {
 在项目文件夹中运行：bash /路径/bootstrap.sh [选项]
 依赖：Bash、curl、tar 和常见系统工具；不需要 Git 或 Node.js。
   --ref <分支或Tag>     默认 main
-  --project-id <标识>   可选；省略时保留未填写
+  --project-id <标识>   可选；写入 MEMORY.md 的稳定 project_id，省略时保留未填写
   --no-symlink          用 README 指针替代技能软链
   --dry-run             下载并显示计划，不写项目目录
   --help, -h            查看说明
@@ -64,9 +64,9 @@ awk '
 tar -xzf "$temporary/template.tar.gz" --strip-components=1 -C "$source_dir" || fail '模板解压失败。'
 
 # 只分发指定模板文件，不分发维护记录、测试或仓库历史。
-for rel in AGENTS.md CLAUDE.md MEMORY.md HANDOFF.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
-  .handoff/CONTEXT.md .handoff/CHECKPOINT.md .claude/settings.json \
-  scripts/check-docs.sh scripts/init.mjs scripts/handoff.mjs scripts/ai-check.mjs .ai/templates/task.json .github/PULL_REQUEST_TEMPLATE.md; do
+for rel in AGENTS.md CLAUDE.md MEMORY.md PROMPTS.md DESIGN.md CHANGELOG.md TODO.md .gitignore \
+  .claude/settings.json \
+  scripts/check-docs.sh scripts/init.mjs scripts/ai-check.mjs .ai/templates/task.json .github/PULL_REQUEST_TEMPLATE.md; do
   [[ -f "$source_dir/$rel" && ! -L "$source_dir/$rel" ]] || fail "模板缺少普通文件：$rel；未修改项目文件。"
   mkdir -p "$stage/$(dirname "$rel")"
   cp "$source_dir/$rel" "$stage/$rel"
@@ -87,18 +87,8 @@ else
   [[ -f "$source_dir/README.project.md" && ! -L "$source_dir/README.project.md" ]] || fail '模板缺少 README.project.md。'
   cp "$source_dir/README.project.md" "$stage/README.md"
 fi
-for rel in .handoff/CONTEXT.md .handoff/CHECKPOINT.md; do
-  grep -q '^- status: draft$' "$stage/$rel" || fail '现场模板不是 draft；未修改项目文件。'
-  grep -q '^- project_id: 未填' "$stage/$rel" || fail '现场模板已填写项目；未修改项目文件。'
-  if [[ -n "$project_id" ]]; then
-    # ENVIRON 防止 awk 将反斜杠标识当作转义字符串处理。
-    HANDOFF_PROJECT_ID="$project_id" awk '/^- project_id:/ { print "- project_id: " ENVIRON["HANDOFF_PROJECT_ID"]; next } { print }' \
-      "$stage/$rel" > "$temporary/record"
-    cp "$temporary/record" "$stage/$rel"
-  fi
-done
 if [[ -n "$project_id" ]]; then
-  HANDOFF_PROJECT_ID="$project_id" awk '/^- 稳定 project_id：/ { print "- 稳定 project_id：" ENVIRON["HANDOFF_PROJECT_ID"]; next } { print }' \
+  TEMPLATE_PROJECT_ID="$project_id" awk '/^- 稳定 project_id：/ { print "- 稳定 project_id：" ENVIRON["TEMPLATE_PROJECT_ID"]; next } { print }' \
     "$stage/MEMORY.md" > "$temporary/MEMORY.md"
   cp "$temporary/MEMORY.md" "$stage/MEMORY.md"
 fi
@@ -154,4 +144,4 @@ fi
     fi
   done < "$temporary/files"
 )
-printf '初始化完成。按当前项目填写说明与需求；没有实际任务时保持 draft。\n'
+printf '初始化完成。按当前项目填写说明与需求；未知信息保留待填写。\n'
